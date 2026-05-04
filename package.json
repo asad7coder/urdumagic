@@ -1,0 +1,61 @@
+{
+  "name": "urdumagic",
+  "version": "0.1.0",
+  "description": "Lightweight TypeScript library for English, Urdu, and Roman Urdu on the web",
+  "type": "module",
+  "main": "./dist/urdumagic.umd.js",
+  "module": "./dist/urdumagic.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/urdumagic.es.js",
+      "require": "./dist/urdumagic.umd.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "vite build && vite build --config vite.iife.config.ts",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "prepublishOnly": "npm run test:run && npm run build",
+    "demo:react": "vite --config demo/react/vite.config.ts",
+    "demo:plain": "npm run build && npx --yes http-server . -p 3000"
+  },
+  "keywords": [
+    "urdu",
+    "roman-urdu",
+    "transliteration",
+    "translation",
+    "pakistan",
+    "rtl",
+    "i18n"
+  ],
+  "author": "Muhammad Asad",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muhammadasad/urdumagic.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
+    "vite-plugin-dts": "^4.4.0",
+    "vitest": "^2.1.8"
+  }
+}
