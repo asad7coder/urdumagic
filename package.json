@@ -1,6 +1,6 @@
 {
   "name": "urdumagic",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lightweight TypeScript library for English, Urdu, and Roman Urdu on the web",
   "type": "module",
   "main": "./dist/urdumagic.umd.js",

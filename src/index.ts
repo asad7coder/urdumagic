@@ -14,20 +14,10 @@ import type {
 } from './types.js';
 
 export type {
-  CacheEntry,
   LangMode,
   ScriptType,
-  TransliterationResult,
-  TranslatorPlugin,
   UrduMagicConfig,
 } from './types.js';
-
-export { transliterateWithTiming, processMixedAuto } from './core/transliterator.js';
-export { detectScript, hasUrduWords, isRomanUrdu, isUrduScript } from './core/detector.js';
-export { LibreTranslateTranslator, createManagedTranslator } from './core/translator.js';
-export { MemoryCache, readLocalStorageCache, writeLocalStorageCache } from './core/cache.js';
-export { debounce, createAsyncRateLimiter } from './core/debounce.js';
-export { ROMAN_TO_URDU, ROMAN_TO_URDU_KEY_COUNT } from './core/roman-urdu-dict.js';
 
 export interface UrduMagicInstance {
   destroy(): void;
@@ -146,10 +136,6 @@ export class UrduMagic {
 
   static detectScript(text: string): ScriptType {
     return detectScriptImpl(text);
-  }
-
-  static getActiveInstance(): UrduMagicInstance | undefined {
-    return activeInstance;
   }
 }
 

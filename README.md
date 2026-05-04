@@ -148,7 +148,6 @@ UrduMagic.init({
 | `UrduMagic.translate` | same as instance | `Promise<string>` | Uses the last `init` pipeline or a lightweight default. |
 | `UrduMagic.toRoman` / `toUrdu` | same as instance | `string` | Static transliteration helpers. |
 | `UrduMagic.detectScript` | `text` | `ScriptType` | `arabic`, `latin`, `roman-urdu`, `english`, or `mixed`. |
-| `isRomanUrdu`, `isUrduScript`, `hasUrduWords` | `text` | `boolean` | Heuristics built on script ranges and Roman Urdu stopwords. |
 
 ## Configuration (`UrduMagicConfig`)
 
