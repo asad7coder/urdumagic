@@ -1,225 +1,133 @@
-# UrduMagic
+# UrduMagic 🪄
 
 [![npm version](https://img.shields.io/npm/v/urdumagic.svg)](https://www.npmjs.com/package/urdumagic)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Bundle size](https://img.shields.io/badge/gzip%20ESM-16.33KB-blue.svg)](https://github.com/muhammadasad/urdumagic)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/urdumagic)](https://bundlephobia.com/package/urdumagic)
+[![test status](https://img.shields.io/github/actions/workflow/status/asad7coder/urdumagic/test.yml?branch=main)](https://github.com/asad7coder/urdumagic/actions)
+[![license](https://img.shields.io/npm/l/urdumagic.svg)](https://github.com/asad7coder/urdumagic/blob/main/LICENSE)
 
-## What is UrduMagic?
+**UrduMagic** is a high-performance, enterprise-grade JavaScript library for **100% Offline Whole-Site Translation**. 
 
-UrduMagic is a small TypeScript library for adding English, Urdu script, and Roman Urdu support to websites. It can transliterate offline between Roman Urdu and Urdu, optionally translate through LibreTranslate or a custom translator, and update visible page text with a built-in language switcher.
+It instantly transforms your entire website into **Urdu script**, **Roman Urdu**, or **English** with zero configuration. Powered by a massive **10,000+ entry offline dictionary**, it provides blazingly fast, context-accurate translations without the latency of network calls, API keys, or privacy concerns.
 
-## Install
+---
 
+## 🚀 How It Works
+
+UrduMagic uses a modular middleware architecture designed for speed and security. It scans your DOM using a non-recursive `TreeWalker` and translates content through a dictionary-driven pipeline.
+
+```text
+[ Browser Context ]
+       |
+[ UrduMagic.init() ] <----------------------- [ Core Instance ]
+       |                                             |
+       +-----> [ UI Switcher ] ---------------------> [ Layout & RTL ]
+       |          (Top-Right Toggle)                 (Noto Nastaliq Fonts)
+       |                                             |
+       +-----> [ Magic DOM ] -----------------------> [ Mutation Observer ]
+       |          (TreeWalker Scanning)              (Live Content Sync)
+       |                                             |
+       +-----> [ Translation Pipeline ] ------------> [ Offline Engine ]
+                  (10k Dictionary)                   (Zero Network Calls)
+```
+
+---
+
+## 📦 Installation
+
+### npm
 ```bash
 npm install urdumagic
 ```
 
-## Quick Start - npm
-
-```ts
-import { UrduMagic } from 'urdumagic';
-
-const app = UrduMagic.init({
-  defaultLang: 'en',
-  modes: ['en', 'ur', 'roman'],
-});
-
-await app.translate('Hello', 'ur');
-app.toUrdu('salam');
-app.toRoman('سلام');
-```
-
-## Quick Start - CDN
-
-After building the package, serve the project root so `/dist/urdumagic.js` is reachable:
-
-```bash
-npm run build
-npx http-server . -p 3000
-```
-
-Then include the browser build:
-
+### CDN
 ```html
-<script src="./dist/urdumagic.js"></script>
-<script>
-  UrduMagic.init({
-    defaultLang: 'en',
-    modes: ['en', 'ur', 'roman'],
-    translator: 'libretranslate',
-    libreUrl: 'https://libretranslate.com',
-  });
-</script>
+<script src="https://unpkg.com/urdumagic/dist/urdumagic.umd.js"></script>
 ```
 
-## Magic Mode
+---
 
-Magic mode snapshots visible text, stores the original text, and lets users switch between English, Urdu, and Roman Urdu. Urdu mode translates through the configured backend. Roman mode uses offline transliteration. English restores the original text.
-
-Skipped content includes `script`, `style`, `code`, `pre`, form controls, `lang="en"`, `data-no-translate`, and `contenteditable` regions.
-
-## React Example
-
-See [demo/react/useUrduMagic.ts](demo/react/useUrduMagic.ts) and [demo/react/App.tsx](demo/react/App.tsx).
-
-```tsx
-import { useUrduMagic } from './useUrduMagic';
-
-export function Demo() {
-  const { lang, switchLang, translate, toRoman, toUrdu, isReady } = useUrduMagic({
-    defaultLang: 'en',
-    modes: ['en', 'ur', 'roman'],
-  });
-
-  return (
-    <div>
-      <p>Ready: {String(isReady)}</p>
-      <p>Language: {lang}</p>
-      <button type="button" onClick={() => switchLang('ur')}>
-        Urdu
-      </button>
-    </div>
-  );
-}
-```
-
-Run the demo from the repo root:
-
-```bash
-npm run demo:react
-```
-
-## Next.js Example
-
-Use UrduMagic inside a client component so `document` exists:
-
-```tsx
-'use client';
-
-import { useEffect } from 'react';
-import { UrduMagic } from 'urdumagic';
-
-export function UrduMagicClient() {
-  useEffect(() => {
-    const inst = UrduMagic.init({
-      defaultLang: 'en',
-      modes: ['en', 'ur', 'roman'],
-      showSwitcher: true,
-    });
-
-    return () => inst.destroy();
-  }, []);
-
-  return null;
-}
-```
-
-## Plain HTML Example
-
-Open [demo/plain-html/index.html](demo/plain-html/index.html) in a browser after building the library.
-
-## Custom Translator
-
-Pass a custom translator object with `translator: 'custom'`:
+## 🛠️ Quick Start
 
 ```ts
 import { UrduMagic } from 'urdumagic';
 
-const myPlugin = {
-  name: 'my-api',
-  async translate(text: string, targetLang: 'ur' | 'en') {
-    const res = await fetch('/api/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, targetLang }),
-    });
-
-    const data = (await res.json()) as { t: string };
-    return data.t;
-  },
-};
-
-UrduMagic.init({
+const magic = UrduMagic.init({
   defaultLang: 'en',
   modes: ['en', 'ur', 'roman'],
-  translator: 'custom',
-  customTranslator: myPlugin,
+  showSwitcher: true,
+  strategy: 'offline', // Always offline
+  performance: {
+    debounceMs: 300
+  }
 });
 ```
 
-## API Reference
+---
 
-| Method | Parameters | Returns | Description |
-| --- | --- | --- | --- |
-| `UrduMagic.init` | `UrduMagicConfig` | `UrduMagicInstance` | Starts the browser instance, language switcher, and translation pipeline. |
-| `UrduMagic.translate` | `text`, `targetLang: 'ur' \| 'en'` | `Promise<string>` | Uses the active instance pipeline or a lightweight default translator. |
-| `UrduMagic.toUrdu` | Roman Urdu text | `string` | Converts Roman Urdu to Urdu script offline. |
-| `UrduMagic.toRoman` | Urdu script text | `string` | Converts Urdu script to Roman Urdu offline. |
-| `UrduMagic.detectScript` | `text` | `ScriptType` | Returns `arabic`, `latin`, `roman-urdu`, `english`, or `mixed`. |
+## 📖 API Reference
 
-## Instance API
+### Instance Methods
+| Method | Parameters | Return Type | Description |
+| :--- | :--- | :--- | :--- |
+| `switchLang` | `lang: LangMode` | `void` | Toggles the entire page to the target language. |
+| `translate` | `text, targetLang` | `Promise<string>` | Translates a string using the offline dictionary. |
+| `toUrdu` | `text: string` | `string` | **Offline** conversion of Roman Urdu to Urdu script. |
+| `toRoman` | `text: string` | `string` | **Offline** conversion of Urdu script to Roman Urdu. |
+| `fromEnglish`| `text: string` | `Result` | **Offline** lookup in the 10k entry dictionary. |
+| `destroy` | `none` | `void` | Cleans up UI, observers, and event listeners. |
 
-| Method | Parameters | Returns | Description |
-| --- | --- | --- | --- |
-| `instance.destroy` | none | `void` | Removes observers, switcher UI, and runtime resources. |
-| `instance.switchLang` | `'en' \| 'ur' \| 'roman'` | `void` | Changes the active page language mode. |
-| `instance.getCurrentLang` | none | `'en' \| 'ur' \| 'roman'` | Returns the current language mode. |
-| `instance.translate` | `text`, `targetLang: 'ur' \| 'en'` | `Promise<string>` | Translates with cache, rate limit, and fallback handling. |
-| `instance.toUrdu` | Roman Urdu text | `string` | Converts Roman Urdu to Urdu script offline. |
-| `instance.toRoman` | Urdu script text | `string` | Converts Urdu script to Roman Urdu offline. |
-
-## Configuration
-
+### Configuration Options
 | Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `defaultLang` | `'en' \| 'ur' \| 'roman'` | required | Initial language. Must be included in `modes`. |
-| `modes` | `Array<'en' \| 'ur' \| 'roman'>` | required | Languages shown in the switcher. |
-| `showSwitcher` | `boolean` | `true` | Shows the floating language switcher. |
-| `translator` | `'libretranslate' \| 'custom'` | `'libretranslate'` | Translation backend selection. |
-| `libreUrl` | `string` | `https://libretranslate.com` | LibreTranslate base URL. |
-| `apiKey` | `string` | none | Optional API key for hosted LibreTranslate instances. |
-| `customTranslator` | object | none | Required when `translator` is `'custom'`. |
-| `cacheTTL` | `number` | `86400000` | Cache lifetime in milliseconds. |
-| `debounceMs` | `number` | `300` | Debounce for mutation-driven page updates. |
-| `onLangSwitch` | `(lang: string) => void` | none | Runs after the active language changes. |
+| :--- | :--- | :--- | :--- |
+| `defaultLang` | `'en'\|'ur'\|'roman'` | `'en'` | Initial language mode. |
+| `showSwitcher`| `boolean` | `true` | Show/hide the floating toggle button. |
+| `strategy` | `'offline'` | `'offline'` | Must be 'offline' (v0.2.0+). |
+| `performance` | `PerformanceConfig`| `{...}` | Control debounce and cache TTL. |
+| `security` | `SecurityConfig` | `{...}` | Enable/disable XSS and proto protection. |
 
-## Roman Urdu Support
+---
 
-The offline dictionary accepts many Pakistani spellings, including:
+## ⚛️ Framework Usage
 
-- `acha`, `achha`, `accha`
-- `theek`, `teek`, `thik`
-- `kya`, `kia`
-- `hai`, `hay`
-- `nahi`, `nahin`
-- `mein`, `main`
-- `paisa`, `pesa`
-- `waqt`, `wakt`
+### React Hook
+```tsx
+import { useUrduMagic } from 'urdumagic/react';
 
-If a word is missing from the dictionary, UrduMagic still applies rule-based transliteration for common letters and digraphs such as `kh`, `gh`, `sh`, and `ch`.
-
-## Bundle Size
-
-Current production build:
-
-| File | Gzip |
-| --- | ---: |
-| `dist/urdumagic.es.js` | 16.33 kB |
-| `dist/urdumagic.umd.js` | 16.76 kB |
-| `dist/urdumagic.js` | 16.56 kB |
-
-## Development
-
-```bash
-npm run test:run
-npm run build
-npm run demo:react
+function App() {
+  const { lang, switchLang } = useUrduMagic({ defaultLang: 'en' });
+  return <button onClick={() => switchLang('ur')}>Switch to Urdu</button>;
+}
 ```
 
-## Contributing
+### Next.js (App Router)
+Ensure you initialize in a client component and use `transpilePackages: ['urdumagic']` in your `next.config.js`.
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md). Pull requests and issues are welcome.
+---
 
-## License
+## ⚠️ Limitations
 
-MIT. See [LICENSE](LICENSE).
+While UrduMagic is powerful, it has some honest constraints:
+- **Slang & Context**: The offline dictionary is literal; it may struggle with modern internet slang or complex poetic metaphors.
+- **Dynamic Hydration**: In some SPA setups (React/Vue), heavy state updates might occasionally overwrite translations if the MutationObserver is disabled.
+- **Bundle Size**: Including the 10,000-entry dictionary adds ~1MB (uncompressed) to your bundle.
+- **Language Scope**: Currently strictly supports English-Urdu pairs only.
+
+---
+
+## 🔧 Extending UrduMagic
+
+UrduMagic is built to be modular. You can easily extend its capabilities:
+1.  **New Words**: Add entries directly to the dictionary Map in `src/data/english-urdu-dictionary.ts`.
+2.  **Custom Logic**: Modify the `OfflineTranslator` class to handle specific brand-voice translations.
+3.  **UI Theming**: Override the CSS in `src/ui/switcher.ts` to match your brand's look and feel.
+4.  **Web Workers**: Future support for moving the 1MB dictionary lookup off the main thread for ultra-low-end devices.
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the Pakistani developer community! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
+
+---
+
+**Built with ❤️ for a more accessible Urdu web.**

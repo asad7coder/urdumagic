@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UrduMagic | Professional English-Urdu Translation Engine</title>
+    <meta name="description" content="An offline-first, high-performance translation engine with 10,000+ dictionary entries. Built for the modern web.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #f43f5e;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15) 0%, rgba(15, 23, 42, 0) 50%);
+        }
+
+        .hero h1 {
+            font-size: 5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #818cf8, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.05em;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            border-radius: 99px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            background-color: var(--primary-dark);
+            box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.5);
+        }
+
+        /* --- Features --- */
+        .features {
+            padding: 8rem 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #818cf8;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+        }
+
+        /* --- Demo Section --- */
+        .demo-section {
+            padding: 8rem 0;
+            background: var(--glass);
+            border-radius: 48px;
+            margin: 4rem 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .demo-content h2 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .demo-box {
+            background: #1e293b;
+            padding: 2rem;
+            border-radius: 16px;
+            border-left: 4px solid var(--primary);
+        }
+
+        /* --- Animations --- */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 3.5rem; }
+            .demo-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Custom Switcher Overrides (if needed) */
+        .urdumagic-switcher {
+            bottom: 2rem !important;
+            right: 2rem !important;
+            background: rgba(30, 41, 59, 0.9) !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <section class="hero">
+        <div class="container">
+            <h1 class="floating">UrduMagic</h1>
+            <p>Transform your website into a bilingual experience with our high-performance, offline-first translation engine. Powered by a 10,000+ entry dictionary.</p>
+            <div class="cta-group">
+                <a href="#demo" class="btn btn-primary">Try Magic Mode</a>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <section class="features">
+            <div class="feature-card">
+                <h3>Offline First</h3>
+                <p>Equipped with a 10,000+ entry TypeScript Map for instant dictionary lookups without an internet connection.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Smart DOM Scanning</h3>
+                <p>Efficient TreeWalker-based traversal identifies text nodes automatically, skipping scripts, styles, and protected content.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Enterprise Security</h3>
+                <p>Built-in XSS protection and input sanitization ensure your site remains secure while offering translations.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Roman Urdu Support</h3>
+                <p>Exclusive support for Roman Urdu transliteration, making your content accessible to a wider audience.</p>
+            </div>
+        </section>
+
+        <section id="demo" class="demo-section">
+            <div class="container">
+                <div class="demo-grid">
+                    <div class="demo-content">
+                        <h2>Magic in Action</h2>
+                        <p>Watch as UrduMagic automatically detects and transforms the English text on this page. No manual wrapping required.</p>
+                        <div class="demo-box">
+                            <p>This paragraph is being managed by Magic Mode. It will automatically switch between English, Urdu script, and Roman Urdu when you use the switcher.</p>
+                        </div>
+                    </div>
+                    <div class="demo-preview">
+                        <div class="feature-card">
+                            <p>"Empowering the digital Urdu experience, one node at a time."</p>
+                            <p style="margin-top: 1rem; font-style: italic;">— UrduMagic Core Engine</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- The actual engine script -->
+    <script src="../dist/urdumagic.js"></script>
+    <script>
+        // Initialize the engine with the new refactored API
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof UrduMagic !== 'undefined') {
+                UrduMagic.init({
+                    defaultLang: 'en',
+                    modes: ['en', 'ur', 'roman'],
+                    showSwitcher: true,
+                    strategy: 'offline',
+                    performance: {
+                        debounceMs: 300,
+                        cacheTTL: 86400000
+                    },
+                    security: {
+                        enableSanitization: true
+                    }
+                });
+            } else {
+                console.warn('UrduMagic not loaded. Run "npm run build" first.');
+            }
+        });
+    </script>
+</body>
+</html>

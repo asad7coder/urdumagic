@@ -1,0 +1,52 @@
+# Next.js Integration
+
+In Next.js, you should initialize UrduMagic inside a **Client Component** since it interacts with the DOM.
+
+## Client Component Wrapper
+
+Create a layout component that initializes the library globally:
+
+```tsx
+'use client';
+
+import { useEffect } from 'react';
+import { UrduMagic } from 'urdumagic';
+
+export function UrduMagicInit() {
+  useEffect(() => {
+    // Initialize once on the client
+    const instance = UrduMagic.init({
+      defaultLang: 'en',
+      modes: ['en', 'ur', 'roman'],
+      showSwitcher: true, // Shows the floating magic button
+    });
+
+    // Cleanup on unmount
+    return () => instance.destroy();
+  }, []);
+
+  return null; // This component doesn't render anything UI-wise
+}
+```
+
+## Adding to Layout
+
+Include the component in your `layout.tsx`:
+
+```tsx
+import { UrduMagicInit } from './components/UrduMagicInit';
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        {children}
+        <UrduMagicInit />
+      </body>
+    </html>
+  );
+}
+```
+
+> [!TIP]
+> Setting `showSwitcher: true` will automatically add a floating button to the bottom-right of your page, allowing users to toggle languages effortlessly.

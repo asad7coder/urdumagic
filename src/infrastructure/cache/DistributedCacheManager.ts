@@ -477,53 +477,61 @@ export class DistributedCacheManager {
     this.cacheStats.misses++;
   }
 
-  private isQuotaExceededError(error: any): boolean {
+  private isQuotaExceededError(error: unknown): boolean {
     return (
-      typeof error === 'object' &&
-      error !== null &&
-      'name' in error &&
-      (error as { name: string }).name === 'QuotaExceededError'
+      error instanceof DOMException &&
+      (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED')
     );
   }
 
   private handleQuotaExceeded(): void {
+    logger.warn('Cache quota exceeded, initiating cleanup');
+    
     // Clear expired entries first
-    const expiredKeys: string[] = [];
+    const now = Date.now();
     for (const [key, entry] of this.memoryCache) {
-      if (this.isExpired(entry)) {
-        expiredKeys.push(key);
+      if (entry.expiresAt < now) {
+        this.memoryCache.delete(key);
       }
     }
 
-    expiredKeys.forEach(key => this.memoryCache.delete(key));
-
-    // If still full, evict LRU entries
-    while (this.memoryCache.size >= this.maxMemoryEntries * 0.8) {
-      this.evictLRU();
+    // If still full, evict 20% of oldest entries
+    if (this.memoryCache.size >= this.maxMemoryEntries * 0.8) {
+      const sortedKeys = Array.from(this.memoryCache.entries())
+        .sort(([, a], [, b]) => a.lastAccess - b.lastAccess)
+        .map(([key]) => key);
+      
+      const toEvict = sortedKeys.slice(0, Math.floor(this.memoryCache.size * 0.2));
+      toEvict.forEach(key => this.memoryCache.delete(key));
     }
 
-    // Clear localStorage expired entries
+    // Clear localStorage
     const lsKeys = Object.keys(localStorage).filter(key => key.startsWith('urdumagic:cache:'));
     lsKeys.forEach(lsKey => {
       try {
-        const entry = JSON.parse(localStorage.getItem(lsKey) || '');
-        if (this.isExpired(entry)) {
-          localStorage.removeItem(lsKey);
+        const raw = localStorage.getItem(lsKey);
+        if (raw) {
+          const entry = JSON.parse(raw);
+          if (entry.expiresAt < now) {
+            localStorage.removeItem(lsKey);
+          }
         }
       } catch (error) {
-        // Remove corrupted entries
         localStorage.removeItem(lsKey);
       }
     });
   }
 
   private generateMessageId(): string {
-    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `msg_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+  }
+
+  destroy(): void {
+    this.memoryCache.clear();
+    this.accessPatterns.clear();
+    this.sharedWorker = null;
+    this.enabled = false;
   }
 }
-
-// ============================================================================
-// EXPORTS
-// ============================================================================
 
 export { DistributedCacheManager as default };

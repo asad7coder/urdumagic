@@ -1,0 +1,42 @@
+# API Reference
+
+Complete documentation of all UrduMagic methods and configuration options.
+
+## Static Methods
+
+These methods are available directly on the `UrduMagic` class.
+
+| Method | Returns | Description |
+| :--- | :--- | :--- |
+| `init(config)` | `UrduMagicInstance` | Initializes the library and returns an instance. |
+| `translate(text, targetLang)` | `Promise<string>` | Static translation helper. |
+| `toUrdu(text)` | `string` | Offline Roman Urdu → Urdu script conversion. |
+| `toRoman(text)` | `string` | Offline Urdu script → Roman Urdu conversion. |
+| `detectScript(text)` | `ScriptType` | Detects script: `arabic`, `latin`, `roman-urdu`, `english`, `mixed`. |
+
+## Instance Methods
+
+Available on the object returned by `UrduMagic.init()`.
+
+| Method | Returns | Description |
+| :--- | :--- | :--- |
+| `switchLang(lang)` | `void` | Switches the current page language (`en`, `ur`, `roman`). |
+| `getCurrentLang()` | `string` | Returns the current active language code. |
+| `translate(text, target)` | `Promise<string>` | Translates text using the configured translator. |
+| `toUrdu(text)` | `string` | Instance-level transliteration to Urdu. |
+| `toRoman(text)` | `string` | Instance-level transliteration to Roman. |
+| `destroy()` | `void` | Cleans up the instance and removes event listeners. |
+
+## Configuration Options
+
+Passed to `UrduMagic.init(config)`.
+
+| Option | Type | Default | Required | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `defaultLang` | `'en'\|'ur'\|'roman'` | - | Yes | Initial language on load. |
+| `modes` | `string[]` | - | Yes | Languages to show in switcher. |
+| `showSwitcher` | `boolean` | `true` | No | Show/hide the floating magic button. |
+| `strategy` | `'offline'` | `'offline'` | No | Strategy to use (must be 'offline'). |
+| `performance` | `PerformanceConfig` | - | No | Cache TTL and debounce settings. |
+| `security` | `SecurityConfig` | - | No | Sanitization and prototype protection. |
+| `onLangSwitch` | `function` | - | No | Callback when language changes. |

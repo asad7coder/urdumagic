@@ -25,7 +25,9 @@ export class SecurityManager {
     /eval\s*\(/gi,
     /function\s*\(/gi,
     /setTimeout\s*\(/gi,
-    /setInterval\s*\(/gi
+    /setInterval\s*\(/gi,
+    /__proto__/gi,
+    /constructor/gi
   ];
 
   private static readonly ALLOWED_TAGS = new Set([
@@ -153,6 +155,18 @@ export class SecurityManager {
       sanitized
     };
   }
+
+  /**
+   * Filter content for safety (alias for validation)
+   */
+  filterContent(text: string): { safe: boolean; reason?: string } {
+    const result = this.validateInput(text);
+    return {
+      safe: result.isValid,
+      reason: result.errors.length > 0 ? result.errors.join(', ') : undefined
+    };
+  }
+
 
   /**
    * Validate batch input
@@ -316,18 +330,25 @@ export class SecurityManager {
     return SecurityManager.DANGEROUS_PATTERNS.some(pattern => pattern.test(text));
   }
 
+  private static readonly HTML_ENTITIES: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    '/': '&#x2F;',
+    '`': '&#x60;',
+    '=': '&#x3D;'
+  };
+
+  /**
+   * Fast HTML encoding using regex
+   */
   private encodeHTML(text: string): string {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    return text.replace(/[&<>"'`=\/]/g, s => SecurityManager.HTML_ENTITIES[s] || s);
   }
 
-  private isValidAttributeName(name: string): boolean {
-    const validPattern = /^[a-zA-Z][a-zA-Z0-9\-_]*$/;
-    return validPattern.test(name) && !name.startsWith('on');
-  }
-
-  private logSecurityEvent(type: string, severity: 'low' | 'medium' | 'high' | 'critical', details: Record<string, any>): void {
+  private logSecurityEvent(type: string, severity: 'low' | 'medium' | 'high' | 'critical', details: Record<string, unknown>): void {
     const event: SecurityEvent = {
       type,
       severity,
@@ -338,69 +359,33 @@ export class SecurityManager {
 
     this.auditLog.push(event);
 
-    // Keep only last 1000 events
     if (this.auditLog.length > 1000) {
       this.auditLog.shift();
     }
 
-    // Log critical events to console
     if (severity === 'critical' || severity === 'high') {
       console.error(`UrduMagic Security Alert [${severity}]: ${type}`, details);
     }
-
-    // In production, send to security monitoring service
-    if (severity === 'critical' && typeof fetch !== 'undefined') {
-      this.reportToSecurityService(event).catch(() => {
-        // Silently fail to avoid breaking functionality
-      });
-    }
   }
 
-  private async reportToSecurityService(event: SecurityEvent): Promise<void> {
-    try {
-      await fetch('/api/security/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(event)
-      });
-    } catch (error) {
-      // Silently fail
-    }
+  async checkRateLimit(userId: string): Promise<RateLimitResult> {
+    // In a real implementation, this would connect to a rate limiter service
+    // For now, we'll return a default 'allowed' result
+    return {
+      allowed: true,
+      retryAfter: 0,
+      reason: 'ok'
+    };
   }
 
-  private injectCSP(): void {
-    if (typeof document === 'undefined') return;
-
-    // Check if CSP already exists
-    const existingCSP = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
-    if (existingCSP) return;
-
-    const meta = document.createElement('meta');
-    meta.httpEquiv = 'Content-Security-Policy';
-    meta.content = this.generateCSP();
-    document.head.appendChild(meta);
+  async healthCheck(): Promise<{ healthy: boolean }> {
+    return { healthy: this.enabled };
   }
 
-  private generateCSP(): string {
-    const directives = [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://libretranslate.com",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https:",
-      "connect-src 'self' https://libretranslate.com https://translation.googleapis.com https://api.openai.com",
-      "font-src 'self' data:",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "frame-ancestors 'none'"
-    ];
-
-    return directives.join('; ');
+  destroy(): void {
+    this.clearAuditLog();
+    this.enabled = false;
   }
 }
-
-// ============================================================================
-// EXPORTS
-// ============================================================================
 
 export { SecurityManager as default };

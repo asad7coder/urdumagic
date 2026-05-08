@@ -6,6 +6,7 @@ import {
 } from './core/translator.js';
 import { createMagicDom } from './injector/magic.js';
 import { createLanguageSwitcher } from './ui/switcher.js';
+import { EnglishEngine } from './engines/englishEngine.js';
 
 import type {
   LangMode,
@@ -23,7 +24,7 @@ export interface UrduMagicInstance {
   destroy(): void;
   switchLang(lang: LangMode): void;
   getCurrentLang(): LangMode;
-  translate(text: string, targetLang: 'ur' | 'en'): Promise<string>;
+  translate(text: string, targetLang: 'ur' | 'en' | 'roman'): Promise<string>;
   toRoman(text: string): string;
   toUrdu(text: string): string;
 }
@@ -38,6 +39,7 @@ function getFallbackTranslator(): ManagedTranslator {
       defaultLang: 'en',
       modes: ['en', 'ur', 'roman'],
       showSwitcher: false,
+      strategy: 'offline',
     });
   }
   return fallbackTranslator;
@@ -66,7 +68,7 @@ export class UrduMagic {
     activeTranslator = managed;
 
     const magic = createMagicDom(document, {
-      debounceMs: config.debounceMs ?? 300,
+      debounceMs: config.performance?.debounceMs ?? config.magicMode?.debounceMs ?? 300,
       translate: (text, targetLang) => managed.translate(text, targetLang),
     });
 
@@ -76,6 +78,10 @@ export class UrduMagic {
       current = lang;
       switcher?.setActive(lang);
       await magic.applyLanguage(lang);
+      
+      // Dispatch global event for other components to sync
+      window.dispatchEvent(new CustomEvent('urdumagic-lang-switch', { detail: { lang } }));
+      
       config.onLangSwitch?.(lang);
     };
 
@@ -104,7 +110,7 @@ export class UrduMagic {
         return current;
       },
 
-      translate(text: string, targetLang: 'ur' | 'en'): Promise<string> {
+      translate(text: string, targetLang: 'ur' | 'en' | 'roman'): Promise<string> {
         return managed.translate(text, targetLang);
       },
 
@@ -122,7 +128,7 @@ export class UrduMagic {
     return instance;
   }
 
-  static translate(text: string, targetLang: 'ur' | 'en'): Promise<string> {
+  static translate(text: string, targetLang: 'ur' | 'en' | 'roman'): Promise<string> {
     return resolveTranslator().translate(text, targetLang);
   }
 
@@ -136,6 +142,18 @@ export class UrduMagic {
 
   static detectScript(text: string): ScriptType {
     return detectScriptImpl(text);
+  }
+
+  /**
+   * Performs offline English to Urdu translation.
+   * No internet connection required.
+   */
+  static fromEnglish(text: string): { urdu: string; roman: string; confidence: 'full' | 'partial' | 'none' } {
+    return {
+      urdu: EnglishEngine.translateToUrdu(text),
+      roman: EnglishEngine.translateToRoman(text),
+      confidence: EnglishEngine.getConfidence(text),
+    };
   }
 }
 

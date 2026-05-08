@@ -14,31 +14,40 @@ export class PerformanceMonitor {
   private startTime: number = Date.now();
   private enabled: boolean = true;
   private maxMetricsPerOperation: number = 100;
-  private operationThresholds: Map<string, number> = new Map();
+  private activeTimers: Map<string, number> = new Map();
 
-  constructor() {
+  constructor(config: any = {}) {
     this.initializeThresholds();
     this.startCleanupInterval();
   }
 
   /**
-   * Start timing an operation
+   * Start timing an operation with a unique ID
    */
-  startTimer(operation: string): () => void {
-    if (!this.enabled) return () => {};
+  startTimer(id: string): void {
+    if (!this.enabled) return;
+    this.activeTimers.set(id, performance.now());
+  }
 
-    const startTime = performance.now();
+  /**
+   * End timing an operation and record the metric
+   */
+  endTimer(id: string, metadata: { operation: string; success: boolean; strategy?: string }): void {
+    if (!this.enabled) return;
     
-    return () => {
-      const duration = performance.now() - startTime;
-      this.recordMetric(operation, duration, true);
-    };
+    const startTime = this.activeTimers.get(id);
+    if (startTime === undefined) return;
+    
+    const duration = performance.now() - startTime;
+    this.activeTimers.delete(id);
+    
+    this.recordMetric(metadata.operation, duration, metadata.success, undefined, metadata.strategy);
   }
 
   /**
    * Record a performance metric
    */
-  recordMetric(operation: string, duration: number, success: boolean = true, error?: string): void {
+  recordMetric(operation: string, duration: number, success: boolean = true, error?: string, strategy?: string): void {
     if (!this.enabled) return;
 
     const metric: PerformanceMetric = {
@@ -46,6 +55,7 @@ export class PerformanceMonitor {
       timestamp: Date.now(),
       operation,
       success,
+      strategy,
       error
     };
 

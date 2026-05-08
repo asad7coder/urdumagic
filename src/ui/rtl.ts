@@ -1,50 +1,60 @@
-const NOTO_LINK_ID = 'urdumagic-noto-nastaliq';
-const NOTO_HREF =
-  'https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap';
+const STYLE_ID = 'urdumagic-rtl-styles';
+const FONT_URL = 'https://fonts.gstatic.com/s/notonastaliqurdu/v18/rax9HiS693836ZOf9IeW_mI_3o0Uun_G3VIdK89H77Y.woff2';
 
 /**
- * Ensure Noto Nastaliq Urdu is loaded (idempotent).
+ * Injects the Noto Nastaliq Urdu @font-face and layout reflow CSS into <head>.
+ * This ensures Urdu text is legible and the layout flips correctly.
  */
-export function ensureNotoNastaliqFont(doc: Document): void {
-  if (doc.getElementById(NOTO_LINK_ID) !== null) return;
-  const link = doc.createElement('link');
-  link.id = NOTO_LINK_ID;
-  link.rel = 'stylesheet';
-  link.href = NOTO_HREF;
-  doc.head.appendChild(link);
-}
+function injectStyles(doc: Document): void {
+  if (doc.getElementById(STYLE_ID)) return;
 
-const STYLE_ID = 'urdumagic-rtl-style';
-
-/**
- * Inject minimal RTL + font CSS for Urdu mode.
- */
-export function ensureRtlStyles(doc: Document): void {
-  if (doc.getElementById(STYLE_ID) !== null) return;
   const style = doc.createElement('style');
   style.id = STYLE_ID;
   style.textContent = `
-.urdumagic-rtl, .urdumagic-rtl * {
-  font-family: 'Noto Nastaliq Urdu', serif;
-}
-`;
+    @font-face {
+      font-family: 'Noto Nastaliq Urdu';
+      src: url('${FONT_URL}') format('woff2');
+      font-display: swap;
+    }
+
+    /* Layout Reflow Logic */
+    [dir="rtl"] {
+      text-align: right;
+    }
+    
+    /* Urdu specific typography for translated spans */
+    [lang="ur"] span[data-original-text] {
+      font-family: 'Noto Nastaliq Urdu', serif !important;
+      line-height: 1.8 !important;
+      font-size: 1.05em;
+      display: inline-block; /* Helps with line-height in some containers */
+    }
+  `;
   doc.head.appendChild(style);
 }
 
 /**
- * Apply RTL document direction and body class for Urdu display.
+ * Applies RTL direction, language markers, and Urdu typography.
  */
 export function applyUrduRtl(doc: Document): void {
-  ensureNotoNastaliqFont(doc);
-  ensureRtlStyles(doc);
+  injectStyles(doc);
+
+  // 1. Root element RTL
   doc.documentElement.setAttribute('dir', 'rtl');
-  doc.body.classList.add('urdumagic-rtl');
+  doc.documentElement.setAttribute('lang', 'ur');
 }
 
 /**
- * Remove RTL direction markers while keeping font resources loaded.
+ * Fully restores the page to LTR and removes Urdu-specific styling.
  */
 export function clearUrduRtl(doc: Document): void {
-  doc.documentElement.removeAttribute('dir');
-  doc.body.classList.remove('urdumagic-rtl');
+  // 1. Restore root attributes
+  doc.documentElement.setAttribute('dir', 'ltr');
+  doc.documentElement.setAttribute('lang', 'en');
+
+  // 2. Remove injected styles
+  const styleTag = doc.getElementById(STYLE_ID);
+  if (styleTag) {
+    styleTag.remove();
+  }
 }

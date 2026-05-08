@@ -1,0 +1,58 @@
+# Quick Start
+
+Get UrduMagic up and running in your project in less than a minute.
+
+## Installation
+
+### via npm
+
+Install the package using your preferred package manager:
+
+```bash
+npm install urdumagic
+```
+
+### via CDN
+
+For plain HTML projects, you can include the script directly:
+
+```html
+<script src="https://unpkg.com/urdumagic/dist/urdumagic.js"></script>
+```
+
+## Basic Usage
+
+Initialize UrduMagic with your desired configuration.
+
+```ts
+import { UrduMagic } from 'urdumagic';
+
+const app = UrduMagic.init({
+  defaultLang: 'en',
+  modes: ['en', 'ur', 'roman'],
+});
+
+// Transliterate Roman Urdu to Urdu Script
+const urdu = app.toUrdu('salam');
+console.log(urdu); // → سلام
+
+// Transliterate back to Roman Urdu
+const roman = app.toRoman('سلام');
+console.log(roman); // → salam
+```
+
+If you need full translation (English ↔ Urdu), you can use the built-in **10,000+ entry offline dictionary**:
+
+```ts
+const result = app.fromEnglish('democracy');
+console.log(result.urdu); // → جمہوریت
+```
+
+For full site translation (English ↔ Urdu), you can use the `translate` method which leverages the **10,000+ entry offline dictionary**:
+
+```ts
+const translation = await app.translate('democracy', 'ur');
+console.log(translation); // → جمہوریت
+```
+
+[Next: Explore the full API Reference →](/docs/api-reference)

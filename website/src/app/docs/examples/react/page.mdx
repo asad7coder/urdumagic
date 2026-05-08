@@ -1,0 +1,65 @@
+# React Usage
+
+UrduMagic works beautifully with React. You can wrap the initialization in a custom hook for easy access.
+
+## useUrduMagic Hook
+
+Create a simple hook to manage language state:
+
+```tsx
+import { useEffect, useState } from 'react';
+import { UrduMagic } from 'urdumagic';
+
+export function useUrduMagic(config) {
+  const [lang, setLang] = useState(config.defaultLang);
+  const [instance, setInstance] = useState(null);
+
+  useEffect(() => {
+    const inst = UrduMagic.init({
+      ...config,
+      onLangSwitch: (newLang) => setLang(newLang)
+    });
+    setInstance(inst);
+    return () => inst.destroy();
+  }, []);
+
+  return { 
+    lang, 
+    instance, 
+    switchLang: (l) => instance?.switchLang(l) 
+  };
+}
+```
+
+## Example Component
+
+Use the hook in your UI:
+
+```tsx
+import { useUrduMagic } from './hooks/useUrduMagic';
+
+export function LanguageDemo() {
+  const { lang, switchLang } = useUrduMagic({
+    defaultLang: 'en',
+    modes: ['en', 'ur', 'roman'],
+  });
+
+  return (
+    <div className="p-4 border rounded-lg">
+      <p className="mb-4">Current Language: <span className="font-bold">{lang}</span></p>
+      
+      <div className="flex gap-2">
+        <button onClick={() => switchLang('ur')} className="px-4 py-2 bg-primary text-white rounded">
+          Urdu (اردو)
+        </button>
+        <button onClick={() => switchLang('roman')} className="px-4 py-2 border rounded">
+          Roman
+        </button>
+        <button onClick={() => switchLang('en')} className="px-4 py-2 border rounded">
+          English
+        </button>
+      </div>
+    </div>
+  );
+}
+```

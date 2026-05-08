@@ -1,0 +1,1 @@
+make file which write feature pennding or missing think for some one contintribe easly

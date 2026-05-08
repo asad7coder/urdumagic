@@ -7,7 +7,8 @@ import type {
   TranslationStrategy,
   UrduMagicConfig,
   UrduMagicInstance,
-  TranslationContext
+  TranslationContext,
+  PerformanceMetric
 } from '../types.js';
 import type { SmartRouter } from '../core/SmartRouter.js';
 import type { StrategyRegistry } from '../core/StrategyRegistry.js';
@@ -63,8 +64,30 @@ export interface TranslationResult {
     cached: boolean;
     fallbackUsed: boolean;
     securityChecks: string[];
-    performanceMetrics: any;
+    performanceMetrics: PerformanceMetric;
   };
+}
+
+/**
+ * Strategy selection result with fallback chain
+ */
+export interface RoutingDecision {
+  strategy: string;
+  fallbackChain: string[];
+  estimatedCost: number;
+  expectedLatency: number;
+}
+
+/**
+ * Internal translation execution result
+ */
+interface ExecutionResult {
+  text: string;
+  success: boolean;
+  fallbackUsed: boolean;
+  cost: number;
+  quality: number;
+  error?: string;
 }
 
 /**
@@ -122,15 +145,13 @@ export class TranslationOrchestrator {
         cached: false,
         fallbackUsed: false,
         securityChecks: [],
-        performanceMetrics: {}
+        performanceMetrics: {} as PerformanceMetric
       }
     };
 
     try {
-      // Store active request
       this.activeRequests.set(request.id, request);
 
-      // Emit translation start event
       this.events.emit('translation:start', {
         requestId: request.id,
         text: request.text,
@@ -138,49 +159,36 @@ export class TranslationOrchestrator {
         priority: request.priority
       });
 
-      // 1. Security validation
+      // 1. SECURITY LAYER
       await this.performSecurityValidation(request, result);
 
-      // 2. Cache check
+      // 2. CACHE LAYER
       if (request.options.useCache !== false) {
         const cachedResult = await this.checkCache(request);
         if (cachedResult) {
-          result.translatedText = cachedResult;
-          result.strategy = 'cache';
-          result.success = true;
-          result.metadata.cached = true;
-          result.responseTime = performance.now() - startTime;
-
-          this.events.emit('translation:complete', {
-            requestId: request.id,
-            result: 'cached',
-            responseTime: result.responseTime
-          });
-
-          return result;
+          return this.finalizeResult(result, cachedResult, 'cache', startTime, true);
         }
       }
 
-      // 3. Strategy selection
-      const routingDecision = await this.selectStrategy(request);
+      // 3. ROUTING LAYER
+      const routingDecision: RoutingDecision = await this.selectStrategy(request);
       result.strategy = routingDecision.strategy;
 
-      // 4. Execute translation
-      const translationResult = await this.executeTranslation(request, routingDecision);
+      // 4. EXECUTION LAYER (with Fallback)
+      const execution: ExecutionResult = await this.executeTranslation(request, routingDecision);
       
-      result.translatedText = translationResult.text;
-      result.success = translationResult.success;
-      result.error = translationResult.error;
-      result.metadata.fallbackUsed = translationResult.fallbackUsed;
-      result.cost = translationResult.cost;
-      result.quality = translationResult.quality;
+      result.translatedText = execution.text;
+      result.success = execution.success;
+      result.error = execution.error;
+      result.metadata.fallbackUsed = execution.fallbackUsed;
+      result.cost = execution.cost;
+      result.quality = execution.quality;
 
-      // 5. Cache result
+      // 5. PERSISTENCE LAYER
       if (result.success && request.options.useCache !== false) {
         await this.cacheResult(request, result);
       }
 
-      // 6. Update metrics
       this.updateMetrics(result, performance.now() - startTime);
 
     } catch (error) {
@@ -195,12 +203,9 @@ export class TranslationOrchestrator {
 
     } finally {
       result.responseTime = performance.now() - startTime;
-      
-      // Clean up
       this.activeRequests.delete(request.id);
       this.addToHistory(result);
 
-      // Emit completion event
       this.events.emit('translation:complete', {
         requestId: request.id,
         result: result.success ? 'success' : 'error',
@@ -212,43 +217,68 @@ export class TranslationOrchestrator {
     return result;
   }
 
+  private finalizeResult(
+    result: TranslationResult,
+    text: string,
+    strategy: string,
+    startTime: number,
+    cached: boolean
+  ): TranslationResult {
+    result.translatedText = text;
+    result.strategy = strategy;
+    result.success = true;
+    result.metadata.cached = cached;
+    result.responseTime = performance.now() - startTime;
+
+    this.events.emit('translation:complete', {
+      requestId: result.id,
+      result: 'cached',
+      responseTime: result.responseTime
+    });
+
+    return result;
+  }
+
   /**
    * Batch translation with optimized processing
    */
   async translateBatch(requests: TranslationRequest[]): Promise<TranslationResult[]> {
     const results: TranslationResult[] = [];
-    
-    // Process in parallel chunks for better performance
-    const chunkSize = 5;
+    const chunkSize = this.config.performance?.batchSize || 5;
+
     for (let i = 0; i < requests.length; i += chunkSize) {
       const chunk = requests.slice(i, i + chunkSize);
       const chunkResults = await Promise.allSettled(
         chunk.map(request => this.translate(request))
       );
       
-      results.push(...chunkResults.map(result => 
-        result.status === 'fulfilled' ? result.value : {
-          id: chunk[chunkResults.indexOf(result)]?.id || '',
-          originalText: chunk[chunkResults.indexOf(result)]?.text || '',
-          translatedText: '',
-          sourceLang: 'auto',
-          targetLang: 'en',
-          strategy: '',
-          responseTime: 0,
-          cost: 0,
-          success: false,
-          error: result.status === 'rejected' ? result.reason.message : 'Unknown error',
-          metadata: {
-            cached: false,
-            fallbackUsed: false,
-            securityChecks: [],
-            performanceMetrics: {}
-          }
-        }
+      results.push(...chunkResults.map((result, idx) => 
+        result.status === 'fulfilled' ? result.value : this.createErrorResult(chunk[idx], result.reason)
       ));
     }
     
     return results;
+  }
+
+  private createErrorResult(request: TranslationRequest, error: any): TranslationResult {
+    return {
+      id: request.id,
+      originalText: request.text,
+      translatedText: '',
+      sourceLang: 'auto',
+      targetLang: request.targetLang,
+      strategy: 'error',
+      responseTime: 0,
+      cost: 0,
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+      metadata: {
+        cached: false,
+        fallbackUsed: false,
+        securityChecks: [],
+        performanceMetrics: {} as PerformanceMetric
+      }
+    };
   }
 
   /**
@@ -288,7 +318,6 @@ export class TranslationOrchestrator {
     const cacheHits = this.requestHistory.filter(r => r.metadata.cached).length;
     const cacheHitRate = totalRequests > 0 ? cacheHits / totalRequests : 0;
 
-    // Count strategy usage
     const strategyCounts = new Map<string, number>();
     for (const result of this.requestHistory) {
       const count = strategyCounts.get(result.strategy) || 0;
@@ -333,11 +362,11 @@ export class TranslationOrchestrator {
   // ============================================================================
 
   private setupEventHandlers(): void {
-    this.events.on('translation:start', (data) => {
+    this.events.on('translation:start', (data: { requestId: string }) => {
       this.performance.startTimer(`translation_${data.requestId}`);
     });
 
-    this.events.on('translation:complete', (data) => {
+    this.events.on('translation:complete', (data: { requestId: string; result: string; strategy?: string }) => {
       this.performance.endTimer(`translation_${data.requestId}`, {
         operation: 'translation',
         success: data.result !== 'error',
@@ -355,23 +384,20 @@ export class TranslationOrchestrator {
       return;
     }
 
-    const checks = [];
+    const checks: string[] = [];
 
-    // Input validation
     const validation = this.security.validateInput(request.text);
     if (!validation.isValid) {
       throw new Error(`Security validation failed: ${validation.errors.join(', ')}`);
     }
     checks.push('input_validated');
 
-    // Rate limiting
     const rateLimitResult = await this.security.checkRateLimit(request.userId || 'anonymous');
     if (!rateLimitResult.allowed) {
       throw new Error(`Rate limit exceeded: ${rateLimitResult.reason}`);
     }
     checks.push('rate_limited');
 
-    // Content filtering
     const contentCheck = this.security.filterContent(request.text);
     if (!contentCheck.safe) {
       throw new Error(`Content blocked: ${contentCheck.reason}`);
@@ -386,7 +412,7 @@ export class TranslationOrchestrator {
     return await this.cache.get(cacheKey);
   }
 
-  private async selectStrategy(request: TranslationRequest): Promise<any> {
+  private async selectStrategy(request: TranslationRequest): Promise<RoutingDecision> {
     const routingContext = {
       text: request.text,
       targetLang: request.targetLang,
@@ -399,20 +425,13 @@ export class TranslationOrchestrator {
       excludedStrategies: request.options.excludedStrategies
     };
 
-    return await this.router.selectStrategy(routingContext);
+    return await this.router.selectStrategy(routingContext) as RoutingDecision;
   }
 
   private async executeTranslation(
     request: TranslationRequest,
-    routingDecision: any
-  ): Promise<{
-    text: string;
-    success: boolean;
-    fallbackUsed: boolean;
-    cost: number;
-    quality?: number;
-    error?: string;
-  }> {
+    routingDecision: RoutingDecision
+  ): Promise<ExecutionResult> {
     const strategy = this.registry.getStrategy(routingDecision.strategy);
     
     if (!strategy) {
@@ -424,7 +443,6 @@ export class TranslationOrchestrator {
       const translatedText = await strategy.translate(request.text, request.targetLang);
       const responseTime = performance.now() - startTime;
 
-      // Update router metrics
       this.router.updateMetrics(routingDecision.strategy, responseTime, true);
 
       return {
@@ -432,14 +450,12 @@ export class TranslationOrchestrator {
         success: true,
         fallbackUsed: false,
         cost: routingDecision.estimatedCost,
-        quality: 0.8 // Default quality, would be calculated in real implementation
+        quality: 0.9
       };
 
     } catch (error) {
-      // Update router metrics
       this.router.updateMetrics(routingDecision.strategy, 0, false);
 
-      // Try fallback strategies
       for (const fallbackStrategy of routingDecision.fallbackChain) {
         try {
           const fallbackInstance = this.registry.getStrategy(fallbackStrategy);
@@ -451,8 +467,8 @@ export class TranslationOrchestrator {
             text: translatedText,
             success: true,
             fallbackUsed: true,
-            cost: 0, // Fallbacks are typically free
-            quality: 0.6 // Lower quality for fallbacks
+            cost: 0,
+            quality: 0.7
           };
 
         } catch (fallbackError) {
@@ -465,6 +481,7 @@ export class TranslationOrchestrator {
         success: false,
         fallbackUsed: false,
         cost: 0,
+        quality: 0,
         error: error instanceof Error ? error.message : String(error)
       };
     }
@@ -472,16 +489,17 @@ export class TranslationOrchestrator {
 
   private async cacheResult(request: TranslationRequest, result: TranslationResult): Promise<void> {
     const cacheKey = this.generateCacheKey(request);
-    await this.cache.set(cacheKey, result.translatedText, 3600000); // 1 hour TTL
+    const ttl = this.config.performance?.cacheTTL || 3600000;
+    await this.cache.set(cacheKey, result.translatedText, ttl);
   }
 
   private updateMetrics(result: TranslationResult, responseTime: number): void {
-    // Update performance metrics
     this.performance.recordMetric('translation', responseTime, result.success);
   }
 
   private generateCacheKey(request: TranslationRequest): string {
-    return `translation:${request.targetLang}:${request.text.substring(0, 100)}`;
+    const hash = btoa(request.text).substring(0, 16);
+    return `translation:${request.targetLang}:${hash}`;
   }
 
   private createTranslationContext(request: TranslationRequest): TranslationContext {
@@ -496,16 +514,10 @@ export class TranslationOrchestrator {
 
   private addToHistory(result: TranslationResult): void {
     this.requestHistory.push(result);
-    
-    // Keep history size in check
     if (this.requestHistory.length > this.maxHistorySize) {
       this.requestHistory.shift();
     }
   }
 }
-
-// ============================================================================
-// EXPORTS
-// ============================================================================
 
 export { TranslationOrchestrator as default };

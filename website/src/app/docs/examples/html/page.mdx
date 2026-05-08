@@ -1,0 +1,44 @@
+# Plain HTML & CDN
+
+Using UrduMagic with a simple script tag is the fastest way to add Urdu support to any existing website.
+
+## Basic Setup
+
+Include the script from Unpkg and initialize it in a `<script>` block.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Website</title>
+</head>
+<body>
+  <h1>Welcome / خوش آمدید</h1>
+  
+  <!-- Content to be translated -->
+  <p>Hello, how are you?</p>
+
+  <!-- Load UrduMagic -->
+  <script src="https://unpkg.com/urdumagic/dist/urdumagic.js"></script>
+  
+  <script>
+    // The library is available as a global 'UrduMagic' object
+    UrduMagic.init({
+      defaultLang: 'en',
+      modes: ['en', 'ur', 'roman'],
+      showSwitcher: true
+    });
+  </script>
+</body>
+</html>
+```
+
+## Magic Mode
+
+When `showSwitcher` is true, UrduMagic will:
+1. Inject a floating UI button.
+2. Auto-scan all text nodes on the page.
+3. Replace text dynamically when the user switches languages.
+
+No complex internationalization (i18n) setup required!

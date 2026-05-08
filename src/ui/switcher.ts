@@ -14,9 +14,6 @@ export function createLanguageSwitcher(
   modes: readonly LangMode[],
   onSelect: (lang: LangMode) => void,
 ): SwitcherController {
-  const prevPadding = doc.body.style.paddingBottom;
-  doc.body.style.paddingBottom = '80px';
-
   const root = doc.createElement('div');
   root.id = 'urdumagic-switcher';
   root.setAttribute('role', 'toolbar');
@@ -75,40 +72,50 @@ export function createLanguageSwitcher(
     style.textContent = `
 #urdumagic-switcher {
   position: fixed;
-  right: 24px;
-  bottom: 24px;
+  top: 80px;
+  right: 20px;
   z-index: 2147483646;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
 #urdumagic-switcher .urdumagic-switcher-bar {
   display: flex;
-  gap: 6px;
-  padding: 6px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 999px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  gap: 8px;
+  padding: 8px;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 #urdumagic-switcher .urdumagic-switcher-btn {
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0 14px;
-  border-radius: 999px;
+  min-width: 60px;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 14px;
   border: 1px solid transparent;
   background: transparent;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+#urdumagic-switcher .urdumagic-switcher-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
 }
 #urdumagic-switcher .urdumagic-switcher-btn[aria-pressed="true"] {
-  background: rgba(26, 86, 219, 0.12);
-  border-color: rgba(26, 86, 219, 0.35);
-  color: #1a56db;
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #0f172a;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 #urdumagic-switcher .urdumagic-switcher-btn:focus-visible {
-  outline: 2px solid #1a56db;
-  outline-offset: 2px;
+  outline: 2px solid #f59e0b;
+  outline-offset: 4px;
 }
 `;
     doc.head.appendChild(style);
@@ -151,7 +158,6 @@ export function createLanguageSwitcher(
     destroy(): void {
       mq?.removeEventListener('change', applyCompact);
       root.remove();
-      doc.body.style.paddingBottom = prevPadding;
     },
   };
 }

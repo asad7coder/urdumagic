@@ -1,5 +1,4 @@
 import { debounce } from '../core/debounce.js';
-import { toRoman } from '../core/transliterator.js';
 import type { LangMode } from '../ui/switcher.js';
 import { applyUrduRtl, clearUrduRtl } from '../ui/rtl.js';
 
@@ -22,7 +21,7 @@ const SKIP_TAGS = new Set([
 
 export interface MagicDomOptions {
   readonly debounceMs: number;
-  readonly translate: (text: string, targetLang: 'ur' | 'en') => Promise<string>;
+  readonly translate: (text: string, targetLang: 'ur' | 'en' | 'roman') => Promise<string>;
 }
 
 export interface MagicDomController {
@@ -38,7 +37,7 @@ function isInHead(el: Element, doc: Document): boolean {
 function shouldSkipElement(el: Element, doc: Document): boolean {
   if (!(el instanceof HTMLElement)) return true;
   if (isInHead(el, doc)) return true;
-  if (SKIP_TAGS.has(el.tagName)) return true;
+  if (SKIP_TAGS.has(el.tagName.toUpperCase())) return true;
   if (el.closest('[contenteditable="true"]') !== null) return true;
   if (el.closest('[data-no-translate]') !== null || el.closest('[data-skip-translate]') !== null)
     return true;
@@ -46,42 +45,6 @@ function shouldSkipElement(el: Element, doc: Document): boolean {
   return false;
 }
 
-function hasElementChildren(el: Element): boolean {
-  return el.children.length > 0;
-}
-
-function isIgnorableText(text: string): boolean {
-  const t = text.trim();
-  if (t.length === 0) return true;
-  if (/^\d+$/.test(t)) return true;
-  return false;
-}
-
-function markLeafIfNeeded(el: HTMLElement, doc: Document): void {
-  if (shouldSkipElement(el, doc)) return;
-  if (hasElementChildren(el)) return;
-  const txt = el.textContent ?? '';
-  if (isIgnorableText(txt)) return;
-  if (!el.hasAttribute(ORIGINAL_ATTR)) {
-    el.setAttribute(ORIGINAL_ATTR, txt);
-  }
-}
-
-function walkForMark(root: Element, doc: Document): void {
-  if (shouldSkipElement(root, doc)) return;
-  if (!hasElementChildren(root)) {
-    markLeafIfNeeded(root as HTMLElement, doc);
-    return;
-  }
-  for (let i = 0; i < root.children.length; i += 1) {
-    const child = root.children[i];
-    if (child !== undefined) walkForMark(child, doc);
-  }
-}
-
-function collectMarked(doc: Document): HTMLElement[] {
-  return Array.from(doc.querySelectorAll(`[${ORIGINAL_ATTR}]`)) as HTMLElement[];
-}
 
 /**
  * Create a DOM translation controller that snapshots text into {@link ORIGINAL_ATTR}
@@ -94,40 +57,87 @@ export function createMagicDom(doc: Document, opts: MagicDomOptions): MagicDomCo
 
   const snapshotAndMark = (): void => {
     if (doc.body === null) return;
-    walkForMark(doc.body, doc);
+    
+    const walker = doc.createTreeWalker(
+      doc.body,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode(node) {
+          const parent = node.parentElement;
+          if (!parent) return NodeFilter.FILTER_REJECT;
+          if (shouldSkipElement(parent, doc)) return NodeFilter.FILTER_REJECT;
+          if (!node.textContent?.trim()) return NodeFilter.FILTER_SKIP;
+          // Skip if already wrapped
+          if (parent.hasAttribute(ORIGINAL_ATTR)) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
+    );
+
+    const textNodes: Text[] = [];
+    let node: Node | null;
+    while ((node = walker.nextNode())) {
+      textNodes.push(node as Text);
+    }
+
+    textNodes.forEach(txtNode => {
+      const parent = txtNode.parentElement;
+      if (!parent) return;
+
+      const originalText = txtNode.textContent || '';
+      const wrapper = doc.createElement('span');
+      wrapper.setAttribute(ORIGINAL_ATTR, originalText);
+      wrapper.textContent = originalText;
+      
+      try {
+        parent.replaceChild(wrapper, txtNode);
+      } catch (e) {
+        // Handle cases where node was removed/moved during iteration
+      }
+    });
   };
 
   const applyLanguageInner = async (lang: LangMode): Promise<void> => {
     if (cancelled) return;
-    const nodes = collectMarked(doc);
+    
+    if (lang === 'en') {
+      clearUrduRtl(doc);
+      const wrappers = doc.querySelectorAll(`span[${ORIGINAL_ATTR}]`);
+      wrappers.forEach(span => {
+        const original = span.getAttribute(ORIGINAL_ATTR);
+        if (original !== null) span.textContent = original;
+      });
+      return;
+    }
+
     if (lang === 'ur') {
       applyUrduRtl(doc);
-      await Promise.all(
-        nodes.map(async (el) => {
-          const original = el.getAttribute(ORIGINAL_ATTR) ?? el.textContent ?? '';
-          const out = await opts.translate(original, 'ur');
-          el.textContent = out;
-        }),
-      );
-      return;
+    } else {
+      clearUrduRtl(doc);
     }
 
-    clearUrduRtl(doc);
+    const wrappers = Array.from(doc.querySelectorAll(`span[${ORIGINAL_ATTR}]`)) as HTMLElement[];
+    const BATCH_SIZE = 20;
 
-    if (lang === 'roman') {
+    for (let i = 0; i < wrappers.length; i += BATCH_SIZE) {
+      if (cancelled) break;
+      const chunk = wrappers.slice(i, i + BATCH_SIZE);
+      
       await Promise.all(
-        nodes.map(async (el) => {
-          const original = el.getAttribute(ORIGINAL_ATTR) ?? el.textContent ?? '';
-          const ur = await opts.translate(original, 'ur');
-          el.textContent = toRoman(ur);
-        }),
+        chunk.map(async (span) => {
+          const original = span.getAttribute(ORIGINAL_ATTR) || '';
+          const out = await opts.translate(original, lang === 'roman' ? 'roman' : 'ur');
+          span.textContent = out;
+        })
       );
-      return;
-    }
-
-    for (const el of nodes) {
-      const original = el.getAttribute(ORIGINAL_ATTR) ?? '';
-      el.textContent = original;
+      
+      await new Promise(resolve => {
+        if (typeof requestIdleCallback !== 'undefined') {
+          requestIdleCallback(resolve);
+        } else {
+          setTimeout(resolve, 0);
+        }
+      });
     }
   };
 

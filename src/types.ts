@@ -3,30 +3,35 @@
 // ============================================================================
 
 /**
+ * Supported language modes
+ */
+export type LangMode = 'en' | 'ur' | 'roman';
+
+/**
+ * Script detection result
+ */
+export type ScriptType = 'arabic' | 'latin' | 'roman-urdu' | 'english' | 'mixed';
+
+/**
+ * Dictionary entry structure
+ */
+export interface DictionaryEntry {
+  urdu: string;
+  roman: string;
+  category: string;
+}
+
+/**
  * Translation strategy interface for internal translation providers
  */
 export interface TranslationStrategy {
   name: string;
-  translate(text: string, targetLang: 'ur' | 'en'): Promise<string>;
-  translateBatch?(texts: string[], targetLang: 'ur' | 'en'): Promise<string[]>;
+  translate(text: string, targetLang: 'ur' | 'en' | 'roman'): Promise<string>;
+  translateBatch?(texts: string[], targetLang: 'ur' | 'en' | 'roman'): Promise<string[]>;
   isAvailable?(): Promise<boolean>;
   getQuota?(): Promise<QuotaInfo | null>;
   getRateLimit?(): Promise<RateLimitInfo | null>;
   destroy?(): void;
-}
-
-/**
- * Translation strategy configuration
- */
-export interface TranslationStrategyConfig {
-  libreUrl?: string;
-  apiKey?: string;
-  googleApiKey?: string;
-  aiProvider?: 'openai' | 'anthropic' | 'custom';
-  aiApiKey?: string;
-  aiModel?: string;
-  timeout?: number;
-  retries?: number;
 }
 
 /**
@@ -40,16 +45,7 @@ export interface RateLimitInfo {
 }
 
 /**
- * Fallback chain configuration
- */
-export interface FallbackChain {
-  strategies: Array<'libre' | 'google' | 'ai' | 'offline'>;
-  strategy?: 'sequential' | 'parallel';
-  timeout?: number;
-}
-
-/**
- * Quota information for translation services
+ * Monitoring configuration
  */
 export interface QuotaInfo {
   used: number;
@@ -67,79 +63,9 @@ export interface TransliterationResult {
   ms: number;
 }
 
-/**
- * Cache entry stored in memory and localStorage.
- */
-export interface CacheEntry {
-  value: string;
-  timestamp: number;
-  expiresAt: number;
-  accessCount?: number;
-  lastAccess?: number;
-}
-
-/**
- * Script detection result.
- */
-export type ScriptType = 'arabic' | 'latin' | 'roman-urdu' | 'english' | 'mixed';
-
-/**
- * Language mode for UI
- */
-export type LangMode = 'en' | 'ur' | 'roman';
-
 // ============================================================================
 // CONFIGURATION TYPES
 // ============================================================================
-
-/**
- * Legacy plugin interface (deprecated in favor of TranslationStrategy)
- * @deprecated Use TranslationStrategy instead
- */
-export interface TranslatorPlugin {
-  name: string;
-  translate(text: string, targetLang: 'ur' | 'en'): Promise<string>;
-  translateBatch?(texts: string[], targetLang: 'ur' | 'en'): Promise<string[]>;
-  healthCheck?(): Promise<boolean>;
-  getQuota?(): Promise<QuotaInfo>;
-}
-
-/**
- * Enhanced translator plugin with advanced features
- * @deprecated Use TranslationStrategy instead
- */
-export interface AdvancedTranslatorPlugin extends TranslatorPlugin {
-  supportedLanguages: Array<'en' | 'ur'>;
-  rateLimit?: {
-    requests: number;
-    window: number; // in milliseconds
-  };
-  pricing?: {
-    costPerCharacter: number;
-    freeCharactersPerMonth?: number;
-  };
-}
-
-/**
- * Fallback translator configuration
- */
-export interface FallbackTranslator {
-  name: string;
-  url?: string;
-  apiKey?: string;
-  weight?: number;
-}
-
-/**
- * Translation context for error handling
- */
-export interface TranslationContext {
-  text: string;
-  targetLang: string;
-  sourceLang: string;
-  plugin: string;
-  timestamp: number;
-}
 
 /**
  * Security configuration
@@ -192,44 +118,41 @@ export interface MonitoringConfig {
  * Complete UrduMagic configuration
  */
 export interface UrduMagicConfig {
-  // Basic settings
   defaultLang: LangMode;
   modes: LangMode[];
   showSwitcher?: boolean;
-
-  // MVP translation settings
-  translator?: 'libretranslate' | 'custom';
-  libreUrl?: string;
-  apiKey?: string;
-  customTranslator?: TranslatorPlugin;
-  cacheTTL?: number;
-  debounceMs?: number;
-
-  // Translation settings (Hybrid System)
-  strategy?: 'libre' | 'google' | 'ai' | 'offline';
-  strategyConfig?: TranslationStrategyConfig;
-  fallbackChain?: FallbackChain;
-  defaultStrategy?: 'libre' | 'google' | 'ai' | 'offline';
-
-  // Performance settings
+  
+  strategy?: 'offline';
+  
   performance?: PerformanceConfig;
-
-  // Magic mode settings
   magicMode?: MagicModeConfig;
-
-  // Security settings
   security?: SecurityConfig;
-
-  // Monitoring settings
   monitoring?: MonitoringConfig;
 
-  // Event callbacks
-  onLangSwitch?: (lang: string) => void;
+  onLangSwitch?: (lang: LangMode) => void;
   onTranslationStart?: (text: string, targetLang: string) => void;
   onTranslationComplete?: (original: string, translated: string, targetLang: string) => void;
   onError?: (error: Error, context: TranslationContext) => void;
-  onStrategyChange?: (oldStrategy: string, newStrategy: string) => void;
-  onFallbackUsed?: (strategy: string, originalStrategy: string) => void;
+}
+
+/**
+ * Translation context for error handling
+ */
+export interface TranslationContext {
+  text: string;
+  targetLang: string;
+  sourceLang: string;
+  plugin: string;
+  timestamp: number;
+}
+
+/**
+ * Managed translator interface
+ */
+export interface ManagedTranslator {
+  translate(text: string, targetLang: 'ur' | 'en' | 'roman'): Promise<string>;
+  translateBatch(texts: string[], targetLang: 'ur' | 'en' | 'roman'): Promise<string[]>;
+  dispose(): void;
 }
 
 // ============================================================================
@@ -240,79 +163,41 @@ export interface UrduMagicConfig {
  * UrduMagic instance interface
  */
 export interface UrduMagicInstance {
-  // Core methods
-  translate(text: string, targetLang: 'ur' | 'en'): Promise<string>;
-  translateBatch?(texts: string[], targetLang: 'ur' | 'en'): Promise<string[]>;
-  toUrdu(text: string): Promise<string>;
-  toRoman(text: string): Promise<string>;
-  detectScript(text: string): ScriptType;
-
-  // Language management
-  setLanguage(lang: LangMode): Promise<void>;
-  getLanguage(): LangMode;
-
-  // Magic mode
-  enableMagicMode(): void;
-  disableMagicMode(): void;
-  isMagicModeEnabled(): boolean;
-
-  // Strategy management
-  setStrategy(strategy: 'libre' | 'google' | 'ai' | 'offline'): void;
-  getCurrentStrategy(): string;
-  getAvailableStrategies(): string[];
-  getStrategyStats(): Record<string, StrategyStats>;
-
-  // Lifecycle
+  switchLang(lang: LangMode): void;
+  getCurrentLang(): LangMode;
+  translate(text: string, targetLang: 'ur' | 'en' | 'roman'): Promise<string>;
+  translateBatch(texts: string[], targetLang: 'ur' | 'en' | 'roman'): Promise<string[]>;
+  toRoman(text: string): string;
+  toUrdu(text: string): string;
+  
+  snapshot(): void;
+  addMagicElement(element: Element): void;
+  removeMagicElement(element: Element): void;
+  destroyMagic(): void;
+  
+  getCacheStats(): CacheStats;
+  clearCache(): void;
+  
+  getPluginInfo(): PluginInfo[];
+  addPlugin(plugin: TranslationStrategy): void;
+  removePlugin(name: string): void;
+  
+  getAnalytics(): AnalyticsData;
+  healthCheck(): Promise<HealthStatus>;
+  
   destroy(): void;
 }
 
 /**
- * Strategy statistics
+ * Cache entry stored in memory and localStorage.
  */
-export interface StrategyStats {
-  name: string;
-  available: boolean;
-  healthy: boolean;
-  totalRequests: number;
-  errorCount: number;
-  avgResponseTime: number;
-  lastUsed: number;
-  quota?: QuotaInfo;
+export interface CacheEntry {
+  value: string;
+  timestamp: number;
+  expiresAt: number;
+  accessCount?: number;
+  lastAccess?: number;
 }
-
-/**
- * Strategy factory function type
- */
-export type StrategyFactory = (config: TranslationStrategyConfig) => TranslationStrategy;
-
-/**
- * Strategy metadata for validation
- */
-export interface StrategyMetadata {
-  name: string;
-  version: string;
-  description: string;
-  author: string;
-  supportedLanguages: Array<'en' | 'ur'>;
-  requiresApiKey: boolean;
-  costPerCharacter?: number;
-  maxTextLength?: number;
-  capabilities: {
-    batchTranslation: boolean;
-    quotaTracking: boolean;
-    rateLimiting: boolean;
-    healthCheck: boolean;
-  };
-  security: {
-    exposesApiKey: boolean;
-    requiresProxy: boolean;
-    clientSafe: boolean;
-  };
-}
-
-// ============================================================================
-// INFRASTRUCTURE TYPES
-// ============================================================================
 
 /**
  * Cache statistics
@@ -368,7 +253,19 @@ export interface HealthStatus {
 }
 
 /**
- * Rate limiting result
+ * Performance metric
+ */
+export interface PerformanceMetric {
+  duration: number;
+  timestamp: number;
+  operation: string;
+  success: boolean;
+  strategy?: string;
+  error?: string;
+}
+
+/**
+ * Rate limit result
  */
 export interface RateLimitResult {
   allowed: boolean;
@@ -388,59 +285,6 @@ export interface SecurityEvent {
 }
 
 /**
- * Performance metric
- */
-export interface PerformanceMetric {
-  duration: number;
-  timestamp: number;
-  operation: string;
-  success: boolean;
-  error?: string;
-}
-
-/**
- * Performance statistics
- */
-export interface PerformanceStats {
-  count: number;
-  avg: number;
-  min: number;
-  max: number;
-  p95: number;
-}
-
-/**
- * API endpoint configuration
- */
-export interface APIEndpoint {
-  url: string;
-  weight: number;
-  region: string;
-  healthy?: boolean;
-  latency?: number;
-}
-
-/**
- * User limit configuration
- */
-export interface UserLimit {
-  requests: number;
-  window: number;
-  current: number;
-  resetTime: number;
-}
-
-/**
- * Global limit configuration
- */
-export interface GlobalLimit {
-  requests: number;
-  window: number;
-  current: number;
-  resetTime: number;
-}
-
-/**
  * Validation result
  */
 export interface ValidationResult {
@@ -448,20 +292,3 @@ export interface ValidationResult {
   errors: string[];
   sanitized: string | string[] | null;
 }
-
-// ============================================================================
-// LEGACY COMPATIBILITY
-// ============================================================================
-
-/**
- * @deprecated Use UrduMagicInstance instead
- */
-export interface LegacyUrduMagicInstance {
-  destroy(): void;
-  switchLang(lang: 'en' | 'ur' | 'roman'): void;
-  getCurrentLang(): 'en' | 'ur' | 'roman';
-  translate(text: string, targetLang: 'ur' | 'en'): Promise<string>;
-  toRoman(text: string): string;
-  toUrdu(text: string): string;
-}
-

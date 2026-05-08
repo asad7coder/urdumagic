@@ -1,6 +1,6 @@
 {
   "name": "urdumagic",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Lightweight TypeScript library for English, Urdu, and Roman Urdu on the web",
   "type": "module",
   "main": "./dist/urdumagic.umd.js",
@@ -24,8 +24,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "prepublishOnly": "npm run test:run && npm run build",
-    "demo:react": "vite --config demo/react/vite.config.ts",
-    "demo:plain": "npm run build && npx --yes http-server . -p 3000"
+    "demo": "npm run build && npx --yes http-server ./demo -p 3000"
   },
   "keywords": [
     "urdu",
