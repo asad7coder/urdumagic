@@ -17,7 +17,8 @@ describe('EnglishEngine / fromEnglish', () => {
   it('should handle partial matches with unknown words', () => {
     const result = UrduMagic.fromEnglish('hello antigravity');
     expect(result.confidence).toBe('partial');
-    expect(result.urdu).toBe('سلام'); 
+    expect(result.urdu).toContain('سلام');
+    expect(result.urdu).toContain('antigravity');
   });
 
   it('should handle Islamic terms', () => {
@@ -35,7 +36,7 @@ describe('EnglishEngine / fromEnglish', () => {
   it('should return none for completely unknown text', () => {
     const result = UrduMagic.fromEnglish('xyzabc123');
     expect(result.confidence).toBe('none');
-    expect(result.urdu).toBe('');
+    expect(result.urdu).toBe('xyzabc123');
   });
 
   it('should handle mixed punctuation', () => {

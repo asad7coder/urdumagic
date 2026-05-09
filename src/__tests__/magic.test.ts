@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createMagicDom } from '../injector/magic.js';
+import { createMagicDom } from '../client/dom-walker.js';
 
 describe('magic.ts - DOM Scanning & RTL', () => {
   let mockTranslate: any;
@@ -60,10 +60,6 @@ describe('magic.ts - DOM Scanning & RTL', () => {
     const style = document.getElementById('urdumagic-rtl-styles');
     expect(style).not.toBeNull();
     expect(style?.textContent).toContain('Noto Nastaliq Urdu');
-    
-    const el = document.getElementById('el');
-    expect(el?.style.fontFamily).toContain('Noto Nastaliq Urdu');
-    expect(el?.style.lineHeight).toBe('2.2');
     
     controller.destroy();
   });

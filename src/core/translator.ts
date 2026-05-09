@@ -2,8 +2,9 @@ import type { UrduMagicConfig, TranslationStrategy, ManagedTranslator } from '..
 export type { ManagedTranslator };
 import { MemoryCache, readLocalStorageCache, writeLocalStorageCache } from './cache.js';
 import { createAsyncRateLimiter } from './debounce.js';
-import { ENGLISH_URDU_DICT } from '../data/english-urdu-dictionary.js';
 import { toRoman, toUrdu } from './transliterator.js';
+import { EnglishEngine } from '../engines/englishEngine.js';
+import { getDictionaryAsync } from './dictionary-loader.js';
 
 const DEFAULT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -39,16 +40,22 @@ export function createManagedTranslator(config: UrduMagicConfig): ManagedTransla
   const limiter = createAsyncRateLimiter(config.performance?.rateLimitMs ?? 500);
 
   const translateWithFallback = async (text: string, targetLang: 'ur' | 'en' | 'roman'): Promise<string> => {
+    // Ensure dictionary is loaded for offline lookups
+    await getDictionaryAsync();
+
     const source = targetLang === 'ur' ? 'en' : 'ur';
     const target = targetLang === 'ur' ? 'ur' : 'en';
     const normalizedText = text.toLowerCase().trim();
     const key = cacheKey(source, target, normalizedText);
 
-    // 1. Offline Dictionary Lookup (Primary)
+    // 1. Dictionary Lookup (Primary)
     if (targetLang === 'ur' || targetLang === 'roman') {
-      const entry = ENGLISH_URDU_DICT.get(normalizedText);
-      if (entry) {
-        return targetLang === 'ur' ? entry.urdu : entry.roman;
+      const translation = targetLang === 'ur'
+        ? EnglishEngine.translateToUrdu(normalizedText)
+        : EnglishEngine.translateToRoman(normalizedText);
+
+      if (translation && translation !== normalizedText) {
+        return translation;
       }
     }
 
@@ -85,7 +92,7 @@ export function createManagedTranslator(config: UrduMagicConfig): ManagedTransla
 
   return {
     translate: translateWithFallback,
-    
+
     async translateBatch(texts: string[], targetLang: 'ur' | 'en' | 'roman'): Promise<string[]> {
       return Promise.all(texts.map(t => translateWithFallback(t, targetLang)));
     },

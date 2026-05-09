@@ -4,6 +4,7 @@
 // ============================================================================
 
 import type { UrduMagicInstance, ScriptType } from '../types.js';
+import { UrduMagic } from '../index.js';
 
 /**
  * Smart translation result
@@ -69,35 +70,35 @@ export class SmartTranslator {
       };
     }
 
-    const detectedScript = this.instance.detectScript(text);
-    
+    const detectedScript = UrduMagic.detectScript(text);
+
     // Determine the best operation based on detected script
     const operation = this.determineOperation(detectedScript, preferredTarget);
-    
+
     let translatedText: string;
     let targetLang: 'ur' | 'en';
-    
+
     try {
       switch (operation) {
         case 'translate':
           targetLang = preferredTarget || 'ur';
           translatedText = await this.instance.translate(text, targetLang);
           break;
-          
+
         case 'transliterate-ur':
           targetLang = 'ur';
           translatedText = await this.instance.toUrdu(text);
           break;
-          
+
         case 'transliterate-roman':
           targetLang = 'en';
           translatedText = await this.instance.toRoman(text);
           break;
-          
+
         default:
           throw new Error(`Unknown operation: ${operation}`);
       }
-      
+
       return {
         originalText: text,
         translatedText,
@@ -106,7 +107,7 @@ export class SmartTranslator {
         targetLang,
         confidence: this.calculateConfidence(detectedScript, operation)
       };
-      
+
     } catch (error) {
       // Fallback to original text if operation fails
       return {
@@ -155,9 +156,13 @@ export class SmartTranslator {
     description: string;
     confidence: number;
   }> {
-    const detectedScript = this.instance.detectScript(text);
-    
-    const suggestions = [];
+    const detectedScript = UrduMagic.detectScript(text);
+
+    const suggestions: Array<{
+      operation: 'translate' | 'transliterate-ur' | 'transliterate-roman';
+      description: string;
+      confidence: number;
+    }> = [];
 
     if (detectedScript === 'english' || detectedScript === 'latin') {
       suggestions.push({
@@ -210,20 +215,20 @@ export class SmartTranslator {
       case 'english':
       case 'latin':
         return 'translate'; // Translate English to Urdu
-        
+
       case 'arabic':
         return 'transliterate-roman'; // Convert Urdu to Roman Urdu
-        
+
       case 'roman-urdu':
         return 'transliterate-ur'; // Convert Roman Urdu to Urdu script
-        
+
       case 'mixed':
         // For mixed scripts, use preferred target or default to translation
         if (preferredTarget === 'en') {
           return 'transliterate-roman';
         }
         return 'translate';
-        
+
       default:
         return 'translate';
     }
@@ -240,10 +245,10 @@ export class SmartTranslator {
     if (detectedScript === 'english' && operation === 'translate') return 0.9;
     if (detectedScript === 'arabic' && operation === 'transliterate-roman') return 0.95;
     if (detectedScript === 'roman-urdu' && operation === 'transliterate-ur') return 0.95;
-    
+
     // Lower confidence for mixed cases
     if (detectedScript === 'mixed') return 0.7;
-    
+
     // Default confidence
     return 0.8;
   }
@@ -252,7 +257,7 @@ export class SmartTranslator {
 /**
  * Convenience function for quick smart translation
  */
-export async function smartTranslate(
+async function smartTranslate(
   instance: UrduMagicInstance,
   text: string,
   preferredTarget?: 'ur' | 'en'
@@ -264,7 +269,7 @@ export async function smartTranslate(
 /**
  * Convenience function for batch smart translation
  */
-export async function smartTranslateBatch(
+async function smartTranslateBatch(
   instance: UrduMagicInstance,
   texts: string[],
   preferredTarget?: 'ur' | 'en'

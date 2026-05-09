@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 export default defineConfig({
   plugins: [
@@ -15,32 +16,55 @@ export default defineConfig({
         'src/core/translator.ts',
         'src/core/cache.ts',
         'src/core/debounce.ts',
-        'src/injector/magic.ts',
-        'src/ui/switcher.ts',
-        'src/ui/rtl.ts',
+        'src/client/dom-walker.ts',
+        'src/client/ui-switcher.ts',
+        'src/client/rtl.ts',
+        'src/server/index.ts',
+        'src/next/index.ts',
+        'src/react/useUrduMagic.tsx',
       ],
       outDir: 'dist',
-      rollupTypes: true,
+      rollupTypes: false,
       exclude: ['**/*.test.ts', '**/demo/**'],
+    }),
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'src/data/english-urdu-dictionary-flat.json',
+          dest: '',
+          rename: 'english-urdu-dictionary-flat.json'
+        }
+      ]
     }),
   ],
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
-      name: 'UrduMagic',
-      formats: ['es', 'umd'],
-      fileName: (format) => {
-        if (format === 'es') return 'urdumagic.es.js';
-        if (format === 'umd') return 'urdumagic.umd.js';
-        return `urdumagic.${format}.js`;
+      entry: {
+        index: path.resolve(__dirname, 'src/index.ts'),
+        'server/index': path.resolve(__dirname, 'src/server/index.ts'),
+        'server/react-server': path.resolve(__dirname, 'src/server/react-server.tsx'),
+        'next/index': path.resolve(__dirname, 'src/next/index.ts'),
+        'next/plugin': path.resolve(__dirname, 'src/next/plugin.js'),
+        'react/index': path.resolve(__dirname, 'src/react/useUrduMagic.tsx'),
       },
+      name: 'UrduMagic',
+      formats: ['es'],
+      fileName: (format, entryName) => `${entryName}.js`,
     },
     emptyOutDir: true,
     sourcemap: true,
     minify: false,
     rollupOptions: {
+      external: ['node-html-parser', 'react', 'react-dom', 'next', 'next/server'],
       output: {
         exports: 'named',
+        globals: {
+          'node-html-parser': 'HTMLParser',
+          react: 'React',
+          'react-dom': 'ReactDOM',
+          next: 'Next',
+          'next/server': 'NextServer',
+        },
       },
     },
   },

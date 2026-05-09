@@ -1,21 +1,15 @@
-// ============================================================================
-// SAFE MAGIC MODE
-// Controlled DOM translation with performance protection
-// ============================================================================
-
-import type { UrduMagicInstance, LangMode } from '../types.js';
-import type { UrduMagicConfig } from '../types.js';
+import type { UrduMagicInstance, UrduMagicConfig } from '../types.js';
 
 /**
  * Safe magic mode options
  */
 export interface SafeMagicModeOptions {
   selector?: string;
-  exclude?: {
-    tags?: string[];
-    classes?: string[];
+  exclude: {
+    tags: string[];
+    classes: string[];
     attributes?: string[];
-    selectors?: string[];
+    selectors: string[];
   };
   debounce?: number;
   preserveOriginal?: boolean;
@@ -37,7 +31,8 @@ export class SafeMagicMode {
   private enabled: boolean = false;
   private observer: MutationObserver | null = null;
   private processedNodes: WeakSet<Node> = new WeakSet();
-  private debounceTimer: number | null = null;
+  private debounceTimer: any = null;
+  private isTranslating: boolean = false;
   private stats = {
     nodesProcessed: 0,
     nodesSkipped: 0,
@@ -48,7 +43,7 @@ export class SafeMagicMode {
   constructor(
     instance: UrduMagicInstance,
     config: UrduMagicConfig,
-    options: SafeMagicModeOptions = {}
+    options: SafeMagicModeOptions = {} as any
   ) {
     this.instance = instance;
     this.config = config;
@@ -86,7 +81,7 @@ export class SafeMagicMode {
       }
 
       // Process existing content
-      this.processContainer(container);
+      void this.processContainer(container);
 
       // Set up observer for dynamic content
       this.setupObserver(container);
@@ -139,6 +134,9 @@ export class SafeMagicMode {
    * Process a specific container
    */
   async processContainer(container: Element): Promise<void> {
+    if (this.isTranslating) return;
+    this.isTranslating = true;
+
     const startTime = performance.now();
 
     try {
@@ -166,6 +164,8 @@ export class SafeMagicMode {
     } catch (error) {
       this.stats.errors++;
       console.error('Magic mode processing error:', error);
+    } finally {
+      this.isTranslating = false;
     }
   }
 
@@ -186,19 +186,30 @@ export class SafeMagicMode {
   }
 
   private setupObserver(container: Element): void {
-    if (!window.MutationObserver) {
+    if (typeof window === 'undefined' || !window.MutationObserver) {
       console.warn('MutationObserver not supported, magic mode will not update dynamically');
       return;
     }
 
     this.observer = new MutationObserver((mutations) => {
+      if (this.isTranslating) return;
+
+      const relevantMutations = mutations.filter(m => {
+        const target = m.target as Element;
+        if (target.hasAttribute?.('data-urdu-magic')) return false;
+        if (target.tagName === 'SCRIPT' || target.tagName === 'STYLE') return false;
+        return m.type === 'childList' || m.type === 'characterData';
+      });
+
+      if (relevantMutations.length === 0) return;
+
       // Debounce rapid mutations
       if (this.debounceTimer) {
         clearTimeout(this.debounceTimer);
       }
 
-      this.debounceTimer = window.setTimeout(() => {
-        this.handleMutations(mutations);
+      this.debounceTimer = setTimeout(() => {
+        this.handleMutations(relevantMutations);
       }, this.options.debounce);
     });
 
@@ -217,12 +228,13 @@ export class SafeMagicMode {
     for (const mutation of mutations) {
       // Handle added nodes
       if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-        for (const node of mutation.addedNodes) {
-          if (node.nodeType === Node.ELEMENT_NODE) {
+        for (let i = 0; i < mutation.addedNodes.length; i++) {
+          const node = mutation.addedNodes[i];
+          if (node.nodeType === 1) { // Node.ELEMENT_NODE
             // Get text nodes from added element
             const textNodes = this.getTextNodes(node as Element);
             nodesToProcess.push(...textNodes);
-          } else if (node.nodeType === Node.TEXT_NODE) {
+          } else if (node.nodeType === 3) { // Node.TEXT_NODE
             nodesToProcess.push(node);
           }
         }
@@ -235,22 +247,29 @@ export class SafeMagicMode {
     }
 
     // Process new/changed nodes
-    this.processNodesAsync(nodesToProcess);
+    void this.processNodesAsync(nodesToProcess);
   }
 
   private async processNodesAsync(nodes: Node[]): Promise<void> {
-    // Process in batches to avoid blocking UI
-    const batchSize = 10;
-    for (let i = 0; i < nodes.length; i += batchSize) {
-      const batch = nodes.slice(i, i + batchSize);
+    if (this.isTranslating || nodes.length === 0) return;
+    this.isTranslating = true;
 
-      // Process batch with small delay
-      await Promise.all(batch.map(node => this.processNode(node)));
+    try {
+      // Process in batches to avoid blocking UI
+      const batchSize = 10;
+      for (let i = 0; i < nodes.length; i += batchSize) {
+        const batch = nodes.slice(i, i + batchSize);
 
-      // Small delay to prevent blocking
-      if (i + batchSize < nodes.length) {
-        await new Promise(resolve => setTimeout(resolve, 0));
+        // Process batch
+        await Promise.all(batch.map(node => this.processNode(node)));
+
+        // Small delay to prevent blocking
+        if (i + batchSize < nodes.length) {
+          await new Promise(resolve => setTimeout(resolve, 0));
+        }
       }
+    } finally {
+      this.isTranslating = false;
     }
   }
 
@@ -336,8 +355,7 @@ export class SafeMagicMode {
       }
 
       // Get current language
-      const currentLang = this.instance.getLanguage();
-      const targetLang = currentLang === 'en' ? 'ur' : 'en';
+      const targetLang = this.instance.getCurrentLang() === 'en' ? 'ur' : 'en';
 
       // Translate text
       const translatedText = await this.instance.translate(originalText, targetLang);
@@ -399,9 +417,5 @@ export class SafeMagicMode {
     return false;
   }
 }
-
-// ============================================================================
-// EXPORTS
-// ============================================================================
 
 export { SafeMagicMode as default };

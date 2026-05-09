@@ -66,6 +66,8 @@ export interface ErrorContext {
   stack?: string;
   userAgent?: string;
   url?: string;
+  retryAfter?: number;
+  originalError?: string;
 }
 
 /**
@@ -95,9 +97,9 @@ export class UrduMagicError extends Error {
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
       url: typeof window !== 'undefined' ? window.location.href : undefined,
       ...context
-    };
+    } as ErrorContext;
     this.retryable = retryable;
-    this.userMessage = this.generateUserMessage(code, message);
+    this.userMessage = this.generateUserMessage(code);
     
     // Maintain stack trace
     if (Error.captureStackTrace) {
@@ -108,7 +110,7 @@ export class UrduMagicError extends Error {
   /**
    * Generate user-friendly error message
    */
-  private generateUserMessage(code: ErrorCode, message: string): string {
+  private generateUserMessage(code: ErrorCode): string {
     switch (code) {
       case ErrorCode.INIT_FAILED:
         return 'Failed to initialize UrduMagic. Please check your configuration.';
@@ -374,7 +376,7 @@ export class ErrorHandler {
   static handle(error: Error, context?: Partial<ErrorContext>): UrduMagicError {
     const urduError = ErrorFactory.fromError(error, context);
     
-    // Log error (in production, this would go to error tracking service)
+    // Log error
     console.error('UrduMagic Error:', urduError.toJSON());
     
     return urduError;
@@ -405,8 +407,4 @@ export class ErrorHandler {
   }
 }
 
-// ============================================================================
-// EXPORTS
-// ============================================================================
-
-export { UrduMagicError as default, ErrorFactory, ErrorHandler };
+export { UrduMagicError as default };

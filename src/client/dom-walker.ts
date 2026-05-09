@@ -1,6 +1,6 @@
 import { debounce } from '../core/debounce.js';
-import type { LangMode } from '../ui/switcher.js';
-import { applyUrduRtl, clearUrduRtl } from '../ui/rtl.js';
+import type { LangMode } from './ui-switcher.js';
+import { applyUrduRtl, clearUrduRtl } from './rtl.js';
 
 const ORIGINAL_ATTR = 'data-original-text';
 
@@ -54,10 +54,11 @@ export function createMagicDom(doc: Document, opts: MagicDomOptions): MagicDomCo
   let observer: MutationObserver | undefined;
   let cancelled = false;
   let currentLang: LangMode = 'en';
+  let isTranslating = false;
 
   const snapshotAndMark = (): void => {
-    if (doc.body === null) return;
-    
+    if (doc.body === null || isTranslating) return;
+
     const walker = doc.createTreeWalker(
       doc.body,
       NodeFilter.SHOW_TEXT,
@@ -88,7 +89,7 @@ export function createMagicDom(doc: Document, opts: MagicDomOptions): MagicDomCo
       const wrapper = doc.createElement('span');
       wrapper.setAttribute(ORIGINAL_ATTR, originalText);
       wrapper.textContent = originalText;
-      
+
       try {
         parent.replaceChild(wrapper, txtNode);
       } catch (e) {
@@ -98,46 +99,51 @@ export function createMagicDom(doc: Document, opts: MagicDomOptions): MagicDomCo
   };
 
   const applyLanguageInner = async (lang: LangMode): Promise<void> => {
-    if (cancelled) return;
-    
-    if (lang === 'en') {
-      clearUrduRtl(doc);
-      const wrappers = doc.querySelectorAll(`span[${ORIGINAL_ATTR}]`);
-      wrappers.forEach(span => {
-        const original = span.getAttribute(ORIGINAL_ATTR);
-        if (original !== null) span.textContent = original;
-      });
-      return;
-    }
+    if (cancelled || isTranslating) return;
+    isTranslating = true;
 
-    if (lang === 'ur') {
-      applyUrduRtl(doc);
-    } else {
-      clearUrduRtl(doc);
-    }
+    try {
+      if (lang === 'en') {
+        clearUrduRtl(doc);
+        const wrappers = doc.querySelectorAll(`span[${ORIGINAL_ATTR}]`);
+        wrappers.forEach(span => {
+          const original = span.getAttribute(ORIGINAL_ATTR);
+          if (original !== null) span.textContent = original;
+        });
+        return;
+      }
 
-    const wrappers = Array.from(doc.querySelectorAll(`span[${ORIGINAL_ATTR}]`)) as HTMLElement[];
-    const BATCH_SIZE = 20;
+      if (lang === 'ur') {
+        applyUrduRtl(doc);
+      } else {
+        clearUrduRtl(doc);
+      }
 
-    for (let i = 0; i < wrappers.length; i += BATCH_SIZE) {
-      if (cancelled) break;
-      const chunk = wrappers.slice(i, i + BATCH_SIZE);
-      
-      await Promise.all(
-        chunk.map(async (span) => {
-          const original = span.getAttribute(ORIGINAL_ATTR) || '';
-          const out = await opts.translate(original, lang === 'roman' ? 'roman' : 'ur');
-          span.textContent = out;
-        })
-      );
-      
-      await new Promise(resolve => {
-        if (typeof requestIdleCallback !== 'undefined') {
-          requestIdleCallback(resolve);
-        } else {
-          setTimeout(resolve, 0);
-        }
-      });
+      const wrappers = Array.from(doc.querySelectorAll(`span[${ORIGINAL_ATTR}]`)) as HTMLElement[];
+      const BATCH_SIZE = 20;
+
+      for (let i = 0; i < wrappers.length; i += BATCH_SIZE) {
+        if (cancelled) break;
+        const chunk = wrappers.slice(i, i + BATCH_SIZE);
+
+        await Promise.all(
+          chunk.map(async (span) => {
+            const original = span.getAttribute(ORIGINAL_ATTR) || '';
+            const out = await opts.translate(original, lang === 'roman' ? 'roman' : 'ur');
+            span.textContent = out;
+          })
+        );
+
+        await new Promise(resolve => {
+          if (typeof requestIdleCallback !== 'undefined') {
+            requestIdleCallback(resolve);
+          } else {
+            setTimeout(resolve, 0);
+          }
+        });
+      }
+    } finally {
+      isTranslating = false;
     }
   };
 
@@ -154,7 +160,20 @@ export function createMagicDom(doc: Document, opts: MagicDomOptions): MagicDomCo
 
   const startObserver = (): void => {
     if (doc.body === null) return;
-    observer = new MutationObserver(() => {
+    observer = new MutationObserver((mutations) => {
+      // LOCK CHECK — prevent infinite loop
+      if (isTranslating) return
+
+      const relevantMutations = mutations.filter(m => {
+        // Ignore our own changes
+        if ((m.target as Element).hasAttribute?.(ORIGINAL_ATTR)) return false
+        // Ignore script/style changes
+        if ((m.target as Element).tagName === 'SCRIPT') return false
+        return m.type === 'childList' || m.type === 'characterData'
+      })
+
+      if (relevantMutations.length === 0) return
+
       debouncedHandleMutations();
     });
     observer.observe(doc.body, { subtree: true, childList: true, characterData: true });

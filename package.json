@@ -1,17 +1,20 @@
 {
   "name": "urdumagic",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Lightweight TypeScript library for English, Urdu, and Roman Urdu on the web",
   "type": "module",
-  "main": "./dist/urdumagic.umd.js",
-  "module": "./dist/urdumagic.es.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/urdumagic.es.js",
-      "require": "./dist/urdumagic.umd.js"
-    }
+    ".": "./dist/index.js",
+    "./react": "./dist/react/index.js",
+    "./server": "./dist/server/index.js",
+    "./next": {
+      "import": "./dist/next/index.js",
+      "require": "./dist/next/plugin.js"
+    },
+    "./react-server": "./dist/server/react-server.js"
   },
   "files": [
     "dist",
@@ -50,11 +53,21 @@
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
     "jsdom": "^25.0.1",
+    "next": "^14.2.35",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "rollup-plugin-copy": "^3.5.0",
     "typescript": "^5.7.2",
     "vite": "^6.0.3",
     "vite-plugin-dts": "^4.4.0",
+    "vite-plugin-static-copy": "^4.1.0",
     "vitest": "^2.1.8"
+  },
+  "peerDependencies": {
+    "react": ">=16",
+    "react-dom": ">=16"
+  },
+  "dependencies": {
+    "node-html-parser": "^7.1.0"
   }
 }

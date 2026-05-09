@@ -166,24 +166,24 @@ export interface UrduMagicInstance {
   switchLang(lang: LangMode): void;
   getCurrentLang(): LangMode;
   translate(text: string, targetLang: 'ur' | 'en' | 'roman'): Promise<string>;
-  translateBatch(texts: string[], targetLang: 'ur' | 'en' | 'roman'): Promise<string[]>;
+  translateBatch?(texts: string[], targetLang: 'ur' | 'en' | 'roman'): Promise<string[]>;
   toRoman(text: string): string;
   toUrdu(text: string): string;
   
-  snapshot(): void;
-  addMagicElement(element: Element): void;
-  removeMagicElement(element: Element): void;
-  destroyMagic(): void;
+  snapshot?(): void;
+  addMagicElement?(element: Element): void;
+  removeMagicElement?(element: Element): void;
+  destroyMagic?(): void;
   
-  getCacheStats(): CacheStats;
-  clearCache(): void;
+  getCacheStats?(): CacheStats;
+  clearCache?(): void;
   
-  getPluginInfo(): PluginInfo[];
-  addPlugin(plugin: TranslationStrategy): void;
-  removePlugin(name: string): void;
+  getPluginInfo?(): PluginInfo[];
+  addPlugin?(plugin: TranslationStrategy): void;
+  removePlugin?(name: string): void;
   
-  getAnalytics(): AnalyticsData;
-  healthCheck(): Promise<HealthStatus>;
+  getAnalytics?(): AnalyticsData;
+  healthCheck?(): Promise<HealthStatus>;
   
   destroy(): void;
 }
