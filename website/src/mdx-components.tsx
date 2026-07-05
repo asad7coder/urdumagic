@@ -83,7 +83,6 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       }
       
       // Block code (pre > code)
-      // @ts-expect-error - CodeBlock is a server component
       return <CodeBlock className={className}>{children as string}</CodeBlock>
     },
     pre: ({ children }) => <>{children}</>,

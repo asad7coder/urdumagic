@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useTheme } from "next-themes"
 import { useState, useEffect } from "react"
-import { Github, Twitter, Globe } from "lucide-react"
+import { Github, Twitter } from "lucide-react"
 
 export default function Footer() {
   const { resolvedTheme } = useTheme()

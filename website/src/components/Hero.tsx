@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+
 import { ArrowRight, Sparkles, Globe, Languages, MousePointer2, Zap } from "lucide-react"
 import Link from "next/link"
 import HeroDemo from "./HeroDemo"

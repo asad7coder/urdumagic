@@ -10,6 +10,7 @@ export default function Playground() {
   const [input, setInput] = useState("salam, kya hal hai aap ka?")
   const [output, setOutput] = useState("")
   const [detected, setDetected] = useState("")
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [lib, setLib] = useState<any>(null)
   
   // Load UrduMagic dynamically (client-side only)

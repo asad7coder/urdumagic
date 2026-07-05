@@ -5,7 +5,7 @@ import { UrduMagic } from "urdumagic"
 
 export default function UrduMagicInit() {
   useEffect(() => {
-    const savedLang = (localStorage.getItem("urdumagic-site-lang") as any) || "en"
+    const savedLang = (localStorage.getItem("urdumagic-site-lang") || "en") as "en" | "ur" | "roman"
     
     // Initialize UrduMagic on the website itself
     const magic = UrduMagic.init({
@@ -21,7 +21,7 @@ export default function UrduMagicInit() {
 
     let currentLang = savedLang;
 
-    const handleSwitch = (e: any) => {
+    const handleSwitch = (e: CustomEvent) => {
       const newLang = e.detail?.lang
       if (newLang && newLang !== currentLang) {
         currentLang = newLang;
@@ -31,10 +31,10 @@ export default function UrduMagicInit() {
       }
     }
 
-    window.addEventListener("urdumagic-lang-switch" as any, handleSwitch)
+    window.addEventListener("urdumagic-lang-switch", handleSwitch as EventListener)
 
     return () => {
-      window.removeEventListener("urdumagic-lang-switch" as any, handleSwitch)
+      window.removeEventListener("urdumagic-lang-switch", handleSwitch as EventListener)
       magic.destroy()
     }
   }, [])

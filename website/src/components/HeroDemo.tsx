@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { ArrowRightLeft, Sparkles, Languages, Info, ArrowDownUp } from "lucide-react"
+import { ArrowRightLeft, Sparkles, Info, ArrowDownUp } from "lucide-react"
 
 type BoxType = 'english' | 'roman' | 'urdu' | null
 
@@ -19,9 +19,10 @@ export default function HeroDemo() {
   const [urdu, setUrdu] = useState('')
   const [isReady, setIsReady] = useState(false)
   const [confidence, setConfidence] = useState<'full' | 'partial' | 'none' | null>(null)
-  const [isTranslating, setIsTranslating] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [isTranslating] = useState(false)
+  const [error] = useState<string | null>(null)
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const libRef = useRef<any>(null)
   const debounceTimer = useRef<NodeJS.Timeout | null>(null)
 
@@ -201,7 +202,8 @@ export default function HeroDemo() {
   )
 }
 
-function Box({ type, label, icon, value, placeholder, isRtl = false, fontClass = "", isFocused, onFocus, onBlur, onChange, isOutput, confidence }: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function Box({ label, icon, value, placeholder, isRtl = false, fontClass = "", isFocused, onFocus, onBlur, onChange, isOutput, confidence }: any) {
   return (
     <div className={`relative flex flex-col gap-2 p-4 rounded-2xl border transition-all duration-300 h-full min-h-[140px] ${
       isFocused 
