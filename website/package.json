@@ -25,7 +25,7 @@
     "shiki": "^1.29.2",
     "tailwind-merge": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
-    "urdumagic": "file:.."
+    "urdumagic": "^0.3.0"
   },
   "devDependencies": {
     "@types/node": "^22",
