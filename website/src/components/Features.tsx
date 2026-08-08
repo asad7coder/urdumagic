@@ -13,7 +13,7 @@ const features = [
   },
   {
     title: "Hardened Security",
-    description: "Advanced XSS sanitization, HTML entity encoding, and prototype pollution protection are baked into the core translation lifecycle.",
+    description: <>Advanced <span data-no-translate className="bidi-isolate">XSS</span> sanitization, <span data-no-translate className="bidi-isolate">HTML</span> entity encoding, and prototype pollution protection are baked into the core translation lifecycle.</>,
     icon: Globe,
   },
   {
@@ -28,7 +28,7 @@ export default function Features() {
     <section className="py-16 bg-muted/30">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4">Why choose UrduMagic?</h2>
+          <h2 className="text-3xl font-bold mb-4">Why choose <span data-no-translate className="bidi-isolate">UrduMagic</span>?</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Everything you need to make your website accessible to Urdu speakers, without the complexity of heavy i18n libraries.
           </p>

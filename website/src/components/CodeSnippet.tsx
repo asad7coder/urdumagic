@@ -14,7 +14,7 @@ export default function CodeSnippet({ code }: { code: string }) {
   }
 
   return (
-    <div className="relative group rounded-xl border bg-zinc-950 overflow-hidden">
+    <div dir="ltr" data-no-translate className="relative group rounded-xl border bg-zinc-950 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-2 bg-zinc-900 border-b border-zinc-800">
         <span className="text-xs font-mono text-zinc-400">Terminal</span>
         <Button 

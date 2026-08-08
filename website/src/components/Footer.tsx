@@ -19,12 +19,12 @@ export default function Footer() {
     : "/urdumagic-light.png"
 
   return (
-    <footer className="border-t py-12 bg-background">
+    <footer dir="ltr" className="border-t py-12 bg-background">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between gap-8 mb-8">
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4 group">
-              <div className="relative w-32 h-10 overflow-hidden rounded-lg border bg-background shadow-sm group-hover:border-primary/50 transition-colors">
+              <div data-no-translate className="relative w-32 h-10 overflow-hidden rounded-lg border bg-background shadow-sm group-hover:border-primary/50 transition-colors">
                 {mounted ? (
                   <Image 
                     src={logoSrc} 
@@ -48,23 +48,23 @@ export default function Footer() {
               <span className="font-bold text-sm">Project</span>
               <Link href="/docs" className="text-sm text-muted-foreground hover:text-primary">Docs</Link>
               <Link href="/playground" className="text-sm text-muted-foreground hover:text-primary">Playground</Link>
-              <Link href="https://github.com/asad7coder/urdumagic" className="text-sm text-muted-foreground hover:text-primary">GitHub</Link>
+              <Link href="https://github.com/asad7coder/urdumagic" className="text-sm text-muted-foreground hover:text-primary"><span data-no-translate className="bidi-isolate">GitHub</span></Link>
             </div>
             <div className="flex flex-col gap-3">
               <span className="font-bold text-sm">Community</span>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-primary">Twitter</Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-primary">Discord</Link>
+              <Link href="#" className="text-sm text-muted-foreground hover:text-primary"><span data-no-translate className="bidi-isolate">Twitter</span></Link>
+              <Link href="#" className="text-sm text-muted-foreground hover:text-primary"><span data-no-translate className="bidi-isolate">Discord</span></Link>
             </div>
             <div className="flex flex-col gap-3">
               <span className="font-bold text-sm">Legal</span>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-primary">MIT License</Link>
+              <Link href="#" className="text-sm text-muted-foreground hover:text-primary"><span data-no-translate className="bidi-isolate">MIT</span> License</Link>
               <Link href="#" className="text-sm text-muted-foreground hover:text-primary">Privacy</Link>
             </div>
           </div>
         </div>
         
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} UrduMagic. Built with ❤️ for the Urdu community.</p>
+          <p>© {new Date().getFullYear()} <span data-no-translate className="bidi-isolate">UrduMagic</span>. Built with ❤️ for the Urdu community.</p>
           <div className="flex gap-4">
             <Link href="https://github.com/asad7coder/urdumagic" target="_blank" className="hover:text-primary"><Github className="w-5 h-5" /></Link>
             <Link href="#" target="_blank" className="hover:text-primary"><Twitter className="w-5 h-5" /></Link>

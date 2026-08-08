@@ -22,11 +22,12 @@ export default function Navbar() {
     : "/urdumagic-light.png"
 
   return (
-    <nav className="fixed top-0 w-full z-50 border-b border-t-[3px] border-t-primary bg-background/80 backdrop-blur-md">
+    <nav dir="ltr" className="fixed top-0 w-full z-50 border-b border-t-[3px] border-t-primary bg-background/80 backdrop-blur-md">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="relative w-48 h-16 overflow-hidden rounded-xl border bg-background shadow-sm group-hover:border-primary/50 transition-colors">
+            {/* Logo image — never translated */}
+            <div data-no-translate className="relative w-48 h-16 overflow-hidden rounded-xl border bg-background shadow-sm group-hover:border-primary/50 transition-colors">
                {mounted ? (
                  <Image 
                    src={logoSrc} 
@@ -63,7 +64,8 @@ export default function Navbar() {
           <Button variant="outline" size="sm" className="hidden md:flex gap-2" asChild>
             <Link href="https://github.com/asad7coder/urdumagic" target="_blank">
               <Github className="w-4 h-4" />
-              GitHub
+              {/* GitHub is a product name — not translated */}
+              <span data-no-translate>GitHub</span>
             </Link>
           </Button>
 
@@ -76,7 +78,7 @@ export default function Navbar() {
       {isMenuOpen && (
         <div className="md:hidden border-t bg-background p-6 flex flex-col gap-6 text-base font-medium animate-in slide-in-from-top duration-300">
           <div className="flex items-center gap-2 mb-2">
-            <div className="relative w-32 h-10 overflow-hidden rounded-lg border">
+            <div data-no-translate className="relative w-32 h-10 overflow-hidden rounded-lg border">
               {mounted && <Image src={logoSrc} alt="UrduMagic" fill sizes="128px" className="object-contain p-1" />}
             </div>
           </div>
@@ -86,7 +88,7 @@ export default function Navbar() {
           <hr />
           <Link href="https://github.com/asad7coder/urdumagic" target="_blank" className="flex items-center gap-2">
             <Github className="w-4 h-4" />
-            GitHub
+            <span data-no-translate>GitHub</span>
           </Link>
         </div>
       )}

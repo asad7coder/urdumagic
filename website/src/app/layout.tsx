@@ -27,6 +27,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/*
+          Warm up the connection to Google Fonts CDN so the Noto Nastaliq Urdu
+          font (injected by the UrduMagic library on Urdu activation) loads faster.
+          This does NOT add an external dependency — the library already loads
+          this font when the user switches to Urdu mode.
+        */}
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -43,3 +52,4 @@ export default function RootLayout({
     </html>
   );
 }
+

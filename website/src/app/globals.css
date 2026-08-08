@@ -143,3 +143,60 @@
   color: var(--color-border);
   opacity: 0.2;
 }
+
+/* =====================================================
+   BIDI UTILITIES — UrduMagic bidirectional text system
+   =====================================================
+   Concept:
+     - Use `data-no-translate` to protect content from being replaced.
+     - Use `dir="ltr"` to protect LAYOUT from the global RTL cascade.
+     - Use `.bidi-isolate` for inline LTR islands inside RTL sentences.
+     - Use `.urdu-script` only on actual Urdu-script text elements.
+   These two concerns are SEPARATE. An element can be dir="ltr"
+   while still being fully translatable.
+   ===================================================== */
+
+/* Inline LTR island inside RTL context (product names, version numbers) */
+.bidi-isolate {
+  unicode-bidi: isolate;
+  direction: ltr;
+  display: inline;
+}
+
+/* Force a container to stay LTR regardless of page direction */
+.ltr-lock {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* Explicit RTL text block */
+.rtl-text {
+  direction: rtl;
+  unicode-bidi: plaintext;
+  text-align: right;
+}
+
+/* Urdu script font — apply ONLY to elements containing Urdu script */
+.urdu-script {
+  font-family:
+    'Noto Nastaliq Urdu',
+    'Noto Naskh Arabic',
+    'Noto Sans Arabic',
+    'Scheherazade New',
+    system-ui,
+    serif;
+  line-height: 2;
+  letter-spacing: 0;
+}
+
+/* Code is always LTR — regardless of page direction.
+   This protects <pre>, <code>, and any element with data-code-block. */
+html[dir="rtl"] pre,
+html[dir="rtl"] code,
+html[dir="rtl"] kbd,
+html[dir="rtl"] samp,
+html[dir="rtl"] [data-code-block] {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
+}

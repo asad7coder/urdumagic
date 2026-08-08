@@ -103,7 +103,7 @@ export default function HeroDemo() {
   }
 
   return (
-    <div data-no-translate className="w-full max-w-5xl rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
+    <div dir="ltr" data-no-translate className="w-full max-w-5xl rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
       <div className="p-6 md:p-8">
         {/* Presets */}
         <div className="flex flex-wrap justify-center gap-3 mb-8">
