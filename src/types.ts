@@ -22,6 +22,15 @@ export interface DictionaryEntry {
 }
 
 /**
+ * A single missing-word record returned by getMissingWords().
+ * Only word and count are exposed publicly; the internal dedup key is not.
+ */
+export interface MissingWordRecord {
+  word: string;
+  count: number;
+}
+
+/**
  * Translation strategy interface for internal translation providers
  */
 export interface TranslationStrategy {
@@ -129,6 +138,27 @@ export interface UrduMagicConfig {
   security?: SecurityConfig;
   monitoring?: MonitoringConfig;
 
+  /**
+   * Collect words not found in the dictionary.
+   * Memory-only by default. Does not affect translation output.
+   * @default false
+   */
+  collectMissingWords?: boolean;
+
+  /**
+   * When true (and collectMissingWords is also true), persist the collected
+   * words to localStorage under a dedicated namespace.
+   * @default false
+   */
+  persistMissingWords?: boolean;
+
+  /**
+   * Maximum number of unique missing-word keys to retain in memory.
+   * Once reached, new keys are ignored; existing keys still increment.
+   * @default 5000
+   */
+  maxMissingWords?: number;
+
   onLangSwitch?: (lang: LangMode) => void;
   onTranslationStart?: (text: string, targetLang: string) => void;
   onTranslationComplete?: (original: string, translated: string, targetLang: string) => void;
@@ -184,6 +214,24 @@ export interface UrduMagicInstance {
   
   getAnalytics?(): AnalyticsData;
   healthCheck?(): Promise<HealthStatus>;
+
+  /**
+   * Returns a snapshot of all currently collected missing words.
+   * Always returns [] when collectMissingWords is false.
+   */
+  getMissingWords(): MissingWordRecord[];
+
+  /** Clears all collected missing words (and persistence if enabled). */
+  clearMissingWords(): void;
+
+  /** Exports all collected missing words as a JSON string. */
+  exportMissingWords(): string;
+
+  /**
+   * Removes a single word from the active missing-word set.
+   * Updates persistence synchronously if enabled.
+   */
+  removeMissingWord(word: string): void;
   
   destroy(): void;
 }

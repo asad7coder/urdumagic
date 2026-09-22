@@ -9,32 +9,49 @@ export class EnglishEngine {
   /**
    * Translates English text to Urdu script using the offline dictionary.
    * Performs exact phrase lookup first, then falls back to word-by-word.
+   *
+   * @param text        The source text to translate.
+   * @param onMissing   Optional internal callback invoked for each token that
+   *                    is NOT found in the dictionary. The original token
+   *                    (with casing) is passed. Return type remains `string`.
    */
-  static translateToUrdu(text: string): string {
+  static translateToUrdu(text: string, onMissing?: (word: string) => void): string {
     const lower = text.toLowerCase().trim();
 
-    // Try exact match
+    // Try exact match (phrase-level)
     const exact = lookupWord(lower) ?? lookupWord(this.cleanToken(lower));
     if (exact) return exact;
 
-    // Try word by word
-    const words = lower.split(/\s+/);
+    // Try word by word — preserve original casing for fallback
+    const words = text.trim().split(/\s+/);
     const results = words.map(word => {
       // Remove punctuation for lookup
       const cleanWord = this.cleanToken(word);
       const match = lookupWord(cleanWord);
-      return match || word;
+      if (match) return match;
+      // Unknown — invoke the collector callback, then return original unchanged
+      onMissing?.(word);
+      return word;
     });
     return results.join(' ');
   }
 
   /**
    * Translates English text to Roman Urdu using the offline dictionary.
+   *
+   * Roman Urdu is derived by first finding the Urdu equivalent via
+   * translateToUrdu(), then transliterating it. Any tokens that miss the
+   * dictionary miss via the same lookup path, so the same onMissing
+   * callback is valid and semantically correct here.
+   *
+   * @param text        The source text.
+   * @param onMissing   Optional internal callback for unknown tokens.
    */
-  static translateToRoman(text: string): string {
+  static translateToRoman(text: string, onMissing?: (word: string) => void): string {
     const lower = text.toLowerCase().trim();
 
-    const urdu = this.translateToUrdu(lower);
+    // Pass original text (not lower) to preserve casing in fallback/collection
+    const urdu = this.translateToUrdu(text, onMissing);
     if (urdu !== lower) {
       return toRoman(urdu);
     }

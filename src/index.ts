@@ -15,6 +15,7 @@ import type {
   ScriptType,
   UrduMagicConfig,
   UrduMagicInstance,
+  MissingWordRecord,
 } from './types.js';
 
 export type {
@@ -22,7 +23,10 @@ export type {
   ScriptType,
   UrduMagicConfig,
   UrduMagicInstance,
+  MissingWordRecord,
 } from './types.js';
+
+export { extendDictionary } from './core/dictionary-loader.js';
 
 let activeTranslator: ManagedTranslator | undefined;
 let fallbackTranslator: ManagedTranslator | undefined;
@@ -99,7 +103,7 @@ export class UrduMagic {
           magic?.destroy();
           switcher?.destroy();
         }
-        managed.dispose();
+        managed.dispose(); // also unsubscribes dictionary listener
         if (activeTranslator === managed) activeTranslator = undefined;
         if (activeInstance === instance) activeInstance = undefined;
       },
@@ -124,6 +128,23 @@ export class UrduMagic {
       toUrdu(text: string): string {
         return toUrduImpl(text);
       },
+
+      // ── Missing-word collector public API ──────────────────────────────────
+      getMissingWords(): MissingWordRecord[] {
+        return (managed as any).collector.getAll();
+      },
+
+      clearMissingWords(): void {
+        (managed as any).collector.clear();
+      },
+
+      exportMissingWords(): string {
+        return (managed as any).collector.export();
+      },
+
+      removeMissingWord(word: string): void {
+        (managed as any).collector.remove(word);
+      },
     };
 
     activeInstance = instance;
@@ -133,6 +154,10 @@ export class UrduMagic {
       current = config.defaultLang;
     }
     return instance;
+  }
+
+  static getInstance(): UrduMagicInstance | undefined {
+    return activeInstance;
   }
 
   /**

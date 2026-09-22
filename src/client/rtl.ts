@@ -1,33 +1,45 @@
 const STYLE_ID = 'urdumagic-rtl-styles';
-const FONT_URL = 'https://fonts.gstatic.com/s/notonastaliqurdu/v18/rax9HiS693836ZOf9IeW_mI_3o0Uun_G3VIdK89H77Y.woff2';
+const FONT_LINK_ID = 'urdumagic-font-link';
 
 /**
  * Injects the Noto Nastaliq Urdu @font-face and layout reflow CSS into <head>.
  * This ensures Urdu text is legible and the layout flips correctly.
  */
 function injectStyles(doc: Document): void {
+  // Inject Google Fonts link
+  if (!doc.getElementById(FONT_LINK_ID)) {
+    const link = doc.createElement('link');
+    link.id = FONT_LINK_ID;
+    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap';
+    link.rel = 'stylesheet';
+    doc.head.appendChild(link);
+  }
+
+  // Inject Styles
   if (doc.getElementById(STYLE_ID)) return;
 
   const style = doc.createElement('style');
   style.id = STYLE_ID;
   style.textContent = `
-    @font-face {
-      font-family: 'Noto Nastaliq Urdu';
-      src: url('${FONT_URL}') format('woff2');
-      font-display: swap;
-    }
-
     /* Layout Reflow Logic */
     [dir="rtl"] {
       text-align: right;
     }
     
-    /* Urdu specific typography for translated spans */
-    [lang="ur"] span[data-original-text] {
+    /* Apply beautiful Nastaliq font to all text in Urdu mode */
+    [lang="ur"] body,
+    [lang="ur"] * {
       font-family: 'Noto Nastaliq Urdu', serif !important;
-      line-height: 1.8 !important;
-      font-size: 1.05em;
-      display: inline-block; /* Helps with line-height in some containers */
+    }
+    
+    /* Optimize spacing for Nastaliq's tall cursive script */
+    [lang="ur"] body {
+      line-height: 2.2 !important;
+    }
+
+    [lang="ur"] h1, [lang="ur"] h2, [lang="ur"] h3, 
+    [lang="ur"] h4, [lang="ur"] h5, [lang="ur"] h6 {
+      line-height: 2.5 !important;
     }
   `;
   doc.head.appendChild(style);

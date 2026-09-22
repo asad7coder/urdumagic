@@ -49053,5 +49053,615 @@
     "urdu": "اردو ویب کے لیے ون کلک پوری سائٹ کا ترجمہ۔ اعلی کارکردگی، محفوظ، اور 10,000+ الفاظ کی ڈکشنری کے ساتھ 100% آف لائن۔",
     "roman": "urdu web ke liye one-click tarjuma.",
     "category": "marketing"
+  },
+  "missing": {
+    "urdu": "گمشدہ",
+    "roman": "missing",
+    "category": "general"
+  },
+  "collector": {
+    "urdu": "جمع کنندہ",
+    "roman": "collector",
+    "category": "general"
+  },
+  "words": {
+    "urdu": "الفاظ",
+    "roman": "words",
+    "category": "general"
+  },
+  "users": {
+    "urdu": "صارفین",
+    "roman": "users",
+    "category": "general"
+  },
+  "encountered": {
+    "urdu": "سامنا ہوا",
+    "roman": "encountered",
+    "category": "general"
+  },
+  "the": {
+    "urdu": "دی",
+    "roman": "the",
+    "category": "general"
+  },
+  "total": {
+    "urdu": "کل",
+    "roman": "total",
+    "category": "general"
+  },
+  "unique": {
+    "urdu": "منفرد",
+    "roman": "unique",
+    "category": "general"
+  },
+  "loading": {
+    "urdu": "لوڈنگ",
+    "roman": "loading",
+    "category": "general"
+  },
+  "fully": {
+    "urdu": "مکمل طور پر",
+    "roman": "fully",
+    "category": "general"
+  },
+  "covering": {
+    "urdu": "احاطہ کرنے والا",
+    "roman": "covering",
+    "category": "general"
+  },
+  "websites": {
+    "urdu": "ویب سائٹ کا",
+    "roman": "websites",
+    "category": "general"
+  },
+  "right": {
+    "urdu": "صحیح",
+    "roman": "right",
+    "category": "general"
+  },
+  "great": {
+    "urdu": "بہت اچھا",
+    "roman": "great",
+    "category": "general"
+  },
+  "add": {
+    "urdu": "شامل کریں",
+    "roman": "add",
+    "category": "general"
+  },
+  "translate": {
+    "urdu": "ترجمہ کریں",
+    "roman": "translate",
+    "category": "general"
+  },
+  "instantly—offline": {
+    "urdu": "فوری طور پر—آف لائن،",
+    "roman": "instantly—offline",
+    "category": "general"
+  },
+  "developerfriendly": {
+    "urdu": "ڈویلپر دوست۔",
+    "roman": "developerfriendly",
+    "category": "general"
+  },
+  "easiest": {
+    "urdu": "سب سے آسان",
+    "roman": "easiest",
+    "category": "general"
+  },
+  "way": {
+    "urdu": "طریقہ",
+    "roman": "way",
+    "category": "general"
+  },
+  "support": {
+    "urdu": "معاونت",
+    "roman": "support",
+    "category": "general"
+  },
+  "any": {
+    "urdu": "کوئی بھی",
+    "roman": "any",
+    "category": "general"
+  },
+  "roman": {
+    "urdu": "رومن",
+    "roman": "roman",
+    "category": "general"
+  },
+  "works": {
+    "urdu": "کام کرتا ہے",
+    "roman": "works",
+    "category": "general"
+  },
+  "keys": {
+    "urdu": "کلیدیں",
+    "roman": "keys",
+    "category": "general"
+  },
+  "required": {
+    "urdu": "درکار",
+    "roman": "required",
+    "category": "general"
+  },
+  "protected": {
+    "urdu": "محفوظ",
+    "roman": "protected",
+    "category": "general"
+  },
+  "theek": {
+    "urdu": "ٹھیک",
+    "roman": "theek",
+    "category": "general"
+  },
+  "hai": {
+    "urdu": "ہے",
+    "roman": "hai",
+    "category": "general"
+  },
+  "ٹھیک": {
+    "urdu": "ٹھیک",
+    "roman": "ٹھیک",
+    "category": "general"
+  },
+  "ہے": {
+    "urdu": "ہے",
+    "roman": "ہے",
+    "category": "general"
+  },
+  "khubsoorat": {
+    "urdu": "خوبصورت",
+    "roman": "khubsoorat",
+    "category": "general"
+  },
+  "خوبصورت": {
+    "urdu": "خوبصورت",
+    "roman": "خوبصورت",
+    "category": "general"
+  },
+  "mohabbat": {
+    "urdu": "محبت",
+    "roman": "mohabbat",
+    "category": "general"
+  },
+  "محبت": {
+    "urdu": "محبت",
+    "roman": "محبت",
+    "category": "general"
+  },
+  "core": {
+    "urdu": "بنیادی",
+    "roman": "core",
+    "category": "general"
+  },
+  "entries": {
+    "urdu": "اندراجات",
+    "roman": "entries",
+    "category": "general"
+  },
+  "perfect": {
+    "urdu": "بہترین",
+    "roman": "perfect",
+    "category": "general"
+  },
+  "built": {
+    "urdu": "بنایا گیا",
+    "roman": "built",
+    "category": "general"
+  },
+  "every": {
+    "urdu": "ہر",
+    "roman": "every",
+    "category": "general"
+  },
+  "web": {
+    "urdu": "ویب",
+    "roman": "web",
+    "category": "general"
+  },
+  "saas": {
+    "urdu": "ساس،",
+    "roman": "saas",
+    "category": "general"
+  },
+  "portals": {
+    "urdu": "پورٹلز،",
+    "roman": "portals",
+    "category": "general"
+  },
+  "personal": {
+    "urdu": "ذاتی",
+    "roman": "personal",
+    "category": "general"
+  },
+  "blogs—urdumagic": {
+    "urdu": "بلاگز—اردو میجک",
+    "roman": "blogs—urdumagic",
+    "category": "general"
+  },
+  "fits": {
+    "urdu": "موزوں ہے",
+    "roman": "fits",
+    "category": "general"
+  },
+  "dashboards": {
+    "urdu": "ڈیش بورڈز",
+    "roman": "dashboards",
+    "category": "general"
+  },
+  "localize": {
+    "urdu": "مقامی بنائیں",
+    "roman": "localize",
+    "category": "general"
+  },
+  "admin": {
+    "urdu": "ایڈمن",
+    "roman": "admin",
+    "category": "general"
+  },
+  "panels": {
+    "urdu": "پینلز",
+    "roman": "panels",
+    "category": "general"
+  },
+  "instantly": {
+    "urdu": "فوری طور پر",
+    "roman": "instantly",
+    "category": "general"
+  },
+  "citizens": {
+    "urdu": "شہریوں",
+    "roman": "citizens",
+    "category": "general"
+  },
+  "chatbots": {
+    "urdu": "چیٹ بوٹس",
+    "roman": "chatbots",
+    "category": "general"
+  },
+  "respond": {
+    "urdu": "جواب دیں",
+    "roman": "respond",
+    "category": "general"
+  },
+  "natively": {
+    "urdu": "مقامی طور پر",
+    "roman": "natively",
+    "category": "general"
+  },
+  "platforms": {
+    "urdu": "پلیٹ فارمز",
+    "roman": "platforms",
+    "category": "general"
+  },
+  "deliver": {
+    "urdu": "فراہم کریں",
+    "roman": "deliver",
+    "category": "general"
+  },
+  "sell": {
+    "urdu": "فروخت کریں",
+    "roman": "sell",
+    "category": "general"
+  },
+  "urduspeaking": {
+    "urdu": "اردو بولنے والے",
+    "roman": "urduspeaking",
+    "category": "general"
+  },
+  "markets": {
+    "urdu": "مارکیٹوں",
+    "roman": "markets",
+    "category": "general"
+  },
+  "blogs": {
+    "urdu": "بلاگز",
+    "roman": "blogs",
+    "category": "general"
+  },
+  "publish": {
+    "urdu": "شائع کریں",
+    "roman": "publish",
+    "category": "general"
+  },
+  "multilingual": {
+    "urdu": "کثیر لسانی",
+    "roman": "multilingual",
+    "category": "general"
+  },
+  "docs": {
+    "urdu": "دستاویزات",
+    "roman": "docs",
+    "category": "general"
+  },
+  "developers": {
+    "urdu": "ڈویلپرز",
+    "roman": "developers",
+    "category": "general"
+  },
+  "internal": {
+    "urdu": "اندرونی",
+    "roman": "internal",
+    "category": "general"
+  },
+  "tools": {
+    "urdu": "ٹولز",
+    "roman": "tools",
+    "category": "general"
+  },
+  "enterprise": {
+    "urdu": "انٹرپرائز",
+    "roman": "enterprise",
+    "category": "general"
+  },
+  "apps": {
+    "urdu": "ایپس",
+    "roman": "apps",
+    "category": "general"
+  },
+  "seconds": {
+    "urdu": "سیکنڈوں",
+    "roman": "seconds",
+    "category": "general"
+  },
+  "package": {
+    "urdu": "پیکج،",
+    "roman": "package",
+    "category": "general"
+  },
+  "youre": {
+    "urdu": "آپ ہیں",
+    "roman": "youre",
+    "category": "general"
+  },
+  "translating": {
+    "urdu": "ترجمہ کر رہے ہیں۔",
+    "roman": "translating",
+    "category": "general"
+  },
+  "a": {
+    "urdu": "ایک",
+    "roman": "a",
+    "category": "general"
+  },
+  "robust": {
+    "urdu": "مضبوط",
+    "roman": "robust",
+    "category": "general"
+  },
+  "5layer": {
+    "urdu": "5-پرت",
+    "roman": "5layer",
+    "category": "general"
+  },
+  "routing": {
+    "urdu": "روٹنگ",
+    "roman": "routing",
+    "category": "general"
+  },
+  "execution": {
+    "urdu": "عمل درآمد",
+    "roman": "execution",
+    "category": "general"
+  },
+  "persistence": {
+    "urdu": "استمرار)",
+    "roman": "persistence",
+    "category": "general"
+  },
+  "ensuring": {
+    "urdu": "یقینی بناتے ہوئے",
+    "roman": "ensuring",
+    "category": "general"
+  },
+  "absolute": {
+    "urdu": "مکمل",
+    "roman": "absolute",
+    "category": "general"
+  },
+  "stability": {
+    "urdu": "استحکام",
+    "roman": "stability",
+    "category": "general"
+  },
+  "predictable": {
+    "urdu": "قابل پیش گوئی",
+    "roman": "predictable",
+    "category": "general"
+  },
+  "results": {
+    "urdu": "نتائج۔",
+    "roman": "results",
+    "category": "general"
+  },
+  "massive": {
+    "urdu": "وسیع",
+    "roman": "massive",
+    "category": "general"
+  },
+  "proprietary": {
+    "urdu": "ملکیتی",
+    "roman": "proprietary",
+    "category": "general"
+  },
+  "entry": {
+    "urdu": "اندراج",
+    "roman": "entry",
+    "category": "general"
+  },
+  "provides": {
+    "urdu": "فراہم کرتا ہے",
+    "roman": "provides",
+    "category": "general"
+  },
+  "instant": {
+    "urdu": "فوری،",
+    "roman": "instant",
+    "category": "general"
+  },
+  "lookups": {
+    "urdu": "تلاشیں",
+    "roman": "lookups",
+    "category": "general"
+  },
+  "vast": {
+    "urdu": "وسیع",
+    "roman": "vast",
+    "category": "general"
+  },
+  "terms": {
+    "urdu": "اصطلاحات",
+    "roman": "terms",
+    "category": "general"
+  },
+  "phrases": {
+    "urdu": "فقرات۔",
+    "roman": "phrases",
+    "category": "general"
+  },
+  "advanced": {
+    "urdu": "جدید",
+    "roman": "advanced",
+    "category": "general"
+  },
+  "sanitization": {
+    "urdu": "صفائی،",
+    "roman": "sanitization",
+    "category": "general"
+  },
+  "entity": {
+    "urdu": "ہستی",
+    "roman": "entity",
+    "category": "general"
+  },
+  "protection": {
+    "urdu": "تحفظ",
+    "roman": "protection",
+    "category": "general"
+  },
+  "baked": {
+    "urdu": "شامل",
+    "roman": "baked",
+    "category": "general"
+  },
+  "lifecycle": {
+    "urdu": "لائف سائیکل۔",
+    "roman": "lifecycle",
+    "category": "general"
+  },
+  "granular": {
+    "urdu": "تفصیلی",
+    "roman": "granular",
+    "category": "general"
+  },
+  "monitoring": {
+    "urdu": "نگرانی",
+    "roman": "monitoring",
+    "category": "general"
+  },
+  "builtin": {
+    "urdu": "بلٹ ان",
+    "roman": "builtin",
+    "category": "general"
+  },
+  "trackers": {
+    "urdu": "ٹریکرز",
+    "roman": "trackers",
+    "category": "general"
+  },
+  "provide": {
+    "urdu": "فراہم کریں",
+    "roman": "provide",
+    "category": "general"
+  },
+  "detailed": {
+    "urdu": "تفصیلی",
+    "roman": "detailed",
+    "category": "general"
+  },
+  "timing": {
+    "urdu": "وقت بندی",
+    "roman": "timing",
+    "category": "general"
+  },
+  "metrics": {
+    "urdu": "میٹرکس",
+    "roman": "metrics",
+    "category": "general"
+  },
+  "features": {
+    "urdu": "خصوصیات",
+    "roman": "features",
+    "category": "general"
+  },
+  "everything": {
+    "urdu": "سب کچھ",
+    "roman": "everything",
+    "category": "general"
+  },
+  "need": {
+    "urdu": "ضرورت،",
+    "roman": "need",
+    "category": "general"
+  },
+  "nothing": {
+    "urdu": "کچھ نہیں",
+    "roman": "nothing",
+    "category": "general"
+  },
+  "dont": {
+    "urdu": "مت کریں",
+    "roman": "dont",
+    "category": "general"
+  },
+  "complete": {
+    "urdu": "مکمل",
+    "roman": "complete",
+    "category": "general"
+  },
+  "solution": {
+    "urdu": "حل۔",
+    "roman": "solution",
+    "category": "general"
+  },
+  "plugins": {
+    "urdu": "پلگ انز،",
+    "roman": "plugins",
+    "category": "general"
+  },
+  "services": {
+    "urdu": "خدمات،",
+    "roman": "services",
+    "category": "general"
+  },
+  "bills": {
+    "urdu": "بل۔",
+    "roman": "bills",
+    "category": "general"
+  },
+  "feature": {
+    "urdu": "خصوصیت",
+    "roman": "feature",
+    "category": "general"
+  },
+  "10k+": {
+    "urdu": "10 ہزار+",
+    "roman": "10k+",
+    "category": "general"
+  },
+  "wholesite": {
+    "urdu": "(پوری سائٹ)",
+    "roman": "wholesite",
+    "category": "general"
+  },
+  "community": {
+    "urdu": "کمیونٹی",
+    "roman": "community",
+    "category": "general"
+  },
+  "legal": {
+    "urdu": "قانونی",
+    "roman": "legal",
+    "category": "general"
   }
 }

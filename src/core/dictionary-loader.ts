@@ -9,6 +9,20 @@ function normalizeKey(text: string): string {
   return text.toLowerCase().trim()
 }
 
+// ── Dictionary-update listeners ───────────────────────────────────────────────
+// Returns an unsubscribe function to prevent leaks across multiple instances.
+type DictUpdateCallback = (words: string[]) => void;
+const dictListeners = new Set<DictUpdateCallback>();
+
+/**
+ * Subscribe to dictionary mutations (extendDictionary calls).
+ * @returns An unsubscribe function — call it in instance.destroy() to avoid leaks.
+ */
+export function onDictionaryUpdate(cb: DictUpdateCallback): () => void {
+  dictListeners.add(cb);
+  return () => { dictListeners.delete(cb); };
+}
+
 // Sync version (for SSR - needed immediately)
 export function getDictionarySync(): Map<string, string> {
   if (cachedDict) return cachedDict
@@ -63,6 +77,8 @@ export function lookupWord(text: string): string | undefined {
 
 /**
  * Extends the default dictionary with custom words.
+ * Notifies all active listeners so they can invalidate caches and
+ * remove newly-covered words from the missing-word collector.
  */
 export function extendDictionary(words: Record<string, string>) {
   if (!cachedDict) {
@@ -75,7 +91,30 @@ export function extendDictionary(words: Record<string, string>) {
   const dict = cachedDict
   if (!dict) return
 
+  const normalizedWords: string[] = [];
   for (const [key, value] of Object.entries(words)) {
-    dict.set(normalizeKey(key), value)
+    const nk = normalizeKey(key)
+    dict.set(nk, value)
+    normalizedWords.push(nk)
   }
+
+  // Notify all instance-level listeners (cache invalidation + collector cleanup)
+  for (const cb of dictListeners) {
+    cb(normalizedWords)
+  }
+}
+
+/**
+ * Tokenizes a normalized cache-key source text using the same logic as
+ * EnglishEngine.cleanToken(), returning an array of clean lowercase tokens.
+ *
+ * This is the ONLY place that parses the normalized source segment of a
+ * cache key — consumers must use this function rather than re-implementing
+ * the logic to guarantee consistency.
+ */
+export function tokenizeNormalized(normalizedText: string): string[] {
+  return normalizedText
+    .split(/\s+/)
+    .map(w => w.replace(/[.,/#!$%^&*;:{}=\-_`~()?[\]"']/g, '').toLowerCase().trim())
+    .filter(Boolean);
 }

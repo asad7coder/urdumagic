@@ -155,16 +155,141 @@ export default async function ListingsPage({ params }) {
 }
 ```
 
-### 📚 Custom Dictionary Guide
+---
+
+## 📚 Custom Vocabularies & Brand Names
+
+UrduMagic makes it incredibly easy to inject your own brand names, modern slang, or missing words without altering the core library. This is fully supported in both the browser and SSR!
 
 ```ts
-import { extendDictionary } from "urdumagic/server";
+import { UrduMagic, extendDictionary } from "urdumagic";
 
+// Simply call this before initializing UrduMagic
 extendDictionary({
-  sahiwal: "ساہیوال",
-  qurbani: "قربانی",
+  "sahiwal": "ساہیوال",
+  "qurbani": "قربانی",
+  "developer-friendly": "ڈویلپر دوست",
+  "instantly-offline": "فوری طور پر آف لائن",
+});
+
+const magic = UrduMagic.init({ ... });
+```
+*(Any word you inject here will automatically be removed from your Missing Word Collector!)*
+
+---
+
+## 🔍 Missing Word Collector
+
+UrduMagic can optionally collect words that are not found in its offline dictionary.
+
+This is useful when building a website and discovering which words should be added to your custom dictionary.
+
+The collector is:
+
+- Local-only
+- Opt-in
+- Offline
+- No telemetry
+- No network requests
+- Privacy-filtered
+- Persistent only when explicitly enabled
+
+### Enable collection
+
+```ts
+const urdu = UrduMagic.init({
+  collectMissingWords: true,
 });
 ```
+
+Translate normally:
+
+```ts
+urdu.translate("Quantum computing is amazing");
+```
+
+Then inspect missing words:
+
+```ts
+const missing = urdu.getMissingWords();
+
+console.log(missing);
+```
+
+Example:
+
+```ts
+[
+  {
+    word: "Quantum",
+    count: 3
+  },
+  {
+    word: "computing",
+    count: 7
+  }
+]
+```
+
+### Persist missing words
+
+Persistence is separate and must be explicitly enabled:
+
+```ts
+const urdu = UrduMagic.init({
+  collectMissingWords: true,
+  persistMissingWords: true,
+});
+```
+
+Missing-word records are stored locally in the browser. 
+
+> **Note:** `persistMissingWords` requires browser `localStorage`; if storage is unavailable, collection continues in memory without crashing.
+
+No data is sent to UrduMagic servers.
+
+### Export
+
+```ts
+const json = urdu.exportMissingWords();
+
+console.log(json);
+```
+
+### Remove a word
+
+```ts
+urdu.removeMissingWord("quantum");
+```
+
+### Clear everything
+
+```ts
+urdu.clearMissingWords();
+```
+
+### Limit collection
+
+The default maximum is 5,000 unique missing words:
+
+```ts
+const urdu = UrduMagic.init({
+  collectMissingWords: true,
+  maxMissingWords: 5000,
+});
+```
+
+`maxMissingWords` limits **unique records**, not total occurrences. Existing records can continue increasing their `count`.
+
+### Disabled by default
+
+Missing-word collection is disabled unless explicitly enabled:
+
+```ts
+const urdu = UrduMagic.init();
+```
+
+Existing applications therefore do not collect or persist missing words.
 
 ### 🔄 Migration: v0.2 → v0.3
 
