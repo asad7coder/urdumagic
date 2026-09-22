@@ -189,7 +189,7 @@ describe('15. Obvious API-key/token patterns are ignored', () => {
   it('sk_ prefixed secrets not collected', () => {
     const c = makeCollector();
     c.add('sk-abcdefghijklmnopqrstuvwxyz1234');
-    c.add('sk_live_xyzabcdefghij12345678901234');
+    c.add('sk_live_fake_key_12345');
     expect(c.getAll()).toHaveLength(0);
   });
 
