@@ -25,6 +25,9 @@
       "@/*": [
         "./src/*"
       ],
+      "node-html-parser": [
+        "./node_modules/node-html-parser"
+      ],
       "urdumagic": [
         "../src/index.ts"
       ],
