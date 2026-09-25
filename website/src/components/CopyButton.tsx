@@ -16,11 +16,21 @@ export function CopyButton({ code }: { code: string }) {
   return (
     <Button
       variant="ghost"
-      size="icon"
-      className="absolute right-4 top-4 h-8 w-8 text-zinc-400 hover:text-white"
+      size="sm"
+      className="h-7 px-2.5 text-xs text-zinc-400 hover:text-white hover:bg-white/10 flex items-center gap-1.5 rounded-lg transition-all"
       onClick={copy}
     >
-      {copied ? <Check className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
+      {copied ? (
+        <>
+          <Check className="h-3.5 w-3.5 text-emerald-400" />
+          <span className="text-emerald-400 font-medium">Copied</span>
+        </>
+      ) : (
+        <>
+          <CopyIcon className="h-3.5 w-3.5" />
+          <span>Copy</span>
+        </>
+      )}
     </Button>
   )
 }

@@ -1,13 +1,17 @@
+import { Check } from "lucide-react"
+
 const FEATURES = [
   { name: "Roman Urdu → Urdu", supported: true },
   { name: "English → Urdu", supported: true },
   { name: "10K+ Offline Dictionary", supported: true },
-  { name: <><span data-no-translate className="bidi-isolate">RTL</span> Support</>, supported: true },
-  { name: "Magic Mode (whole-site)", supported: true },
-  { name: "Offline First", supported: true },
-  { name: <span data-no-translate className="bidi-isolate">TypeScript</span>, supported: true },
-  { name: <><span data-no-translate className="bidi-isolate">React</span> Support</>, supported: true },
-  { name: <><span data-no-translate className="bidi-isolate">Next.js</span> Support</>, supported: true },
+  { name: "Missing Word Collector & Tracker", supported: true },
+  { name: "Custom Vocabularies (`extendDictionary`)", supported: true },
+  { name: <><span data-no-translate className="bidi-isolate">RTL</span> Support & Typography</>, supported: true },
+  { name: "Magic Mode (Whole-site DOM)", supported: true },
+  { name: "Offline First (Zero-latency)", supported: true },
+  { name: <><span data-no-translate className="bidi-isolate">TypeScript</span> Support</>, supported: true },
+  { name: <><span data-no-translate className="bidi-isolate">React</span> Hooks & Provider (`urdumagic/react`)</>, supported: true },
+  { name: <><span data-no-translate className="bidi-isolate">Next.js</span> App Router & SSR (`urdumagic/next`)</>, supported: true },
   { name: <><span data-no-translate className="bidi-isolate">MIT</span> License</>, supported: true },
   { name: <><span data-no-translate className="bidi-isolate">XSS</span> Protection</>, supported: true },
   { name: <>No <span data-no-translate className="bidi-isolate">API</span> Keys Required</>, supported: true },
@@ -48,8 +52,8 @@ export default function FeatureComparison() {
                 {feature.name}
               </div>
               <div className="flex justify-center items-center">
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-400 text-sm font-bold">
-                  ✓
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-400">
+                  <Check className="w-3.5 h-3.5" />
                 </span>
               </div>
             </div>

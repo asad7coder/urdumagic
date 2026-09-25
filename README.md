@@ -72,22 +72,32 @@ const magic = UrduMagic.init({
 
 ### Static Methods
 
-| Method        | Parameters         | Return Type       | Description                                          |
-| :------------ | :----------------- | :---------------- | :--------------------------------------------------- |
-| `autoTranslate`| `text, targetLang` | `Promise<string>` | Auto-detects script and translates accordingly.      |
-| `detectScript`| `text: string`     | `ScriptType`      | Detects the script type of the input text.           |
-| `renderToString`| `html, targetLang, config?` | `Promise<string>` | Renders HTML with UrduMagic translations for SSR.    |
+| Method | Parameters | Return Type | Description |
+| :--- | :--- | :--- | :--- |
+| `init` | `config: UrduMagicConfig` | `UrduMagicInstance` | Initializes UrduMagic with the given config. |
+| `getInstance` | `none` | `UrduMagicInstance \| undefined` | Returns the currently active instance. |
+| `autoTranslate` | `text, targetLang` | `Promise<string>` | Auto-detects script and translates accordingly. |
+| `detectScript` | `text: string` | `ScriptType` | Detects script type (`arabic`, `latin`, `english`, etc.). |
+| `fromEnglish` | `text: string` | `Result` | **Offline** synchronous lookup with confidence scoring. |
+| `toUrdu` | `text: string` | `string` | **Offline** Roman Urdu to Urdu script transliteration. |
+| `toRoman` | `text: string` | `string` | **Offline** Urdu script to Roman Urdu transliteration. |
+| `renderToString` | `html, targetLang, config?` | `Promise<string>` | Translates raw HTML for SSR (Server-Side Rendering). |
+| `extendDictionary` | `words: Record<string, string>` | `void` | Injects custom runtime words & brand terms. |
 
 ### Instance Methods
 
-| Method        | Parameters         | Return Type       | Description                                          |
-| :------------ | :----------------- | :---------------- | :--------------------------------------------------- |
-| `switchLang`  | `lang: LangMode`   | `void`            | Toggles the entire page to the target language.      |
-| `translate`   | `text, targetLang` | `Promise<string>` | Translates a string using the offline dictionary.    |
-| `toUrdu`      | `text: string`     | `string`          | **Offline** conversion of Roman Urdu to Urdu script. |
-| `toRoman`     | `text: string`     | `string`          | **Offline** conversion of Urdu script to Roman Urdu. |
-| `fromEnglish` | `text: string`     | `Result`          | **Offline** lookup in the 10k entry dictionary.      |
-| `destroy`     | `none`             | `void`            | Cleans up UI, observers, and event listeners.        |
+| Method | Parameters | Return Type | Description |
+| :--- | :--- | :--- | :--- |
+| `switchLang` | `lang: LangMode` | `void` | Toggles the entire page to the target language. |
+| `getCurrentLang` | `none` | `LangMode` | Returns the current active language mode. |
+| `translate` | `text, targetLang` | `Promise<string>` | Translates a string using the offline dictionary. |
+| `toUrdu` | `text: string` | `string` | **Offline** conversion of Roman Urdu to Urdu script. |
+| `toRoman` | `text: string` | `string` | **Offline** conversion of Urdu script to Roman Urdu. |
+| `getMissingWords` | `none` | `MissingWordRecord[]` | Returns all untranslated words recorded during runtime. |
+| `exportMissingWords` | `none` | `string` | Exports recorded missing words as a JSON string. |
+| `clearMissingWords` | `none` | `void` | Clears all recorded missing words. |
+| `removeMissingWord` | `word: string` | `void` | Removes a specific word from the missing collector. |
+| `destroy` | `none` | `void` | Cleans up DOM observers, switcher UI, and listeners. |
 
 ### Configuration Options
 
@@ -298,6 +308,30 @@ Existing applications therefore do not collect or persist missing words.
   - `urdumagic/server`: For Node.js/SSR.
   - `urdumagic/next`: For Next.js plugins and helpers.
   - `urdumagic/react-server`: For React Server Components.
+
+---
+
+## 🤖 AI Assistant Implementation Prompt
+
+If you're building with AI coding assistants (Cursor, GitHub Copilot, ChatGPT, Claude, Antigravity), copy and paste this prompt into your AI tool to implement and verify UrduMagic in seconds:
+
+```markdown
+Integrate UrduMagic into our project to provide 100% offline English, Urdu, and Roman Urdu support.
+
+Requirements:
+1. Install `urdumagic` (`npm install urdumagic`).
+2. For React: Use `import { useUrduMagic, UrduMagicProvider } from 'urdumagic/react'`.
+3. For Next.js: Wrap client initialization in a `'use client'` component or use `renderToString` from `urdumagic/server` for SSR.
+4. For Plain HTML: Use `UrduMagic.init({ defaultLang: 'en', modes: ['en', 'ur', 'roman'], showSwitcher: true })`.
+5. Custom Terms: Use `extendDictionary({ 'brand': 'برانڈ' })` from `urdumagic` for custom brand vocabulary.
+6. RTL & Bidi: Ensure `dir="rtl"` is applied for Urdu and wrap non-translatable text (code, logos) with `data-no-translate`.
+
+Verification Checklist:
+- Run `npm run build` to verify there are zero build/module resolution errors.
+- Test offline lookup: `UrduMagic.fromEnglish('welcome')` -> `{ urdu: 'خوش آمدید' }`.
+- Test transliteration: `UrduMagic.toUrdu('salam')` -> `'سلام'`.
+- Verify switching languages toggles DOM text and sets `dir="rtl"` correctly.
+```
 
 ---
 

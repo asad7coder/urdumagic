@@ -6,7 +6,7 @@ import { UrduMagic, extendDictionary } from "urdumagic"
 export default function UrduMagicInit() {
   useEffect(() => {
     const savedLang = (localStorage.getItem("urdumagic-site-lang") || "en") as "en" | "ur" | "roman"
-    
+
     // Add website-specific missing words directly here
     extendDictionary({
       "missing": "گمشدہ",

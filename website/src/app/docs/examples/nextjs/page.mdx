@@ -1,10 +1,14 @@
 # Next.js Integration
 
-In Next.js, you should initialize UrduMagic inside a **Client Component** since it interacts with the DOM.
+UrduMagic works seamlessly with Next.js App Router and Pages Router, supporting both **Client-Side Magic Mode** and **Server-Side Rendering (SSR)**.
 
-## Client Component Wrapper
+---
 
-Create a layout component that initializes the library globally:
+## 1. Client-Side Magic Mode (App Router)
+
+To enable automatic whole-page DOM translation with a floating toggle button, initialize UrduMagic inside a Client Component:
+
+### Create `UrduMagicInit.tsx`
 
 ```tsx
 'use client';
@@ -14,29 +18,25 @@ import { UrduMagic } from 'urdumagic';
 
 export function UrduMagicInit() {
   useEffect(() => {
-    // Initialize once on the client
     const instance = UrduMagic.init({
       defaultLang: 'en',
       modes: ['en', 'ur', 'roman'],
-      showSwitcher: true, // Shows the floating magic button
+      showSwitcher: true, // Injects floating toggle button
     });
 
-    // Cleanup on unmount
     return () => instance.destroy();
   }, []);
 
-  return null; // This component doesn't render anything UI-wise
+  return null;
 }
 ```
 
-## Adding to Layout
-
-Include the component in your `layout.tsx`:
+### Add to Root Layout (`app/layout.tsx`)
 
 ```tsx
-import { UrduMagicInit } from './components/UrduMagicInit';
+import { UrduMagicInit } from '@/components/UrduMagicInit';
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
@@ -48,5 +48,42 @@ export default function RootLayout({ children }) {
 }
 ```
 
-> [!TIP]
-> Setting `showSwitcher: true` will automatically add a floating button to the bottom-right of your page, allowing users to toggle languages effortlessly.
+---
+
+## 2. Server-Side Rendering (SSR) & Server Components
+
+For pre-rendering translated HTML on the server or translating API responses before sending to the client, use `renderToString` from `urdumagic/server`:
+
+```tsx
+import { renderToString } from 'urdumagic/server';
+
+export default async function BlogPostPage({ params }: { params: { slug: string; lang?: string } }) {
+  const { lang = 'ur' } = params;
+  const post = await getBlogPost(params.slug);
+
+  // Translates raw HTML on the server and applies dir="rtl"
+  const translatedHtml = await renderToString(post.contentHtml, lang as 'ur' | 'roman' | 'en');
+
+  return (
+    <article className="prose max-w-2xl mx-auto p-6">
+      <h1>{post.title}</h1>
+      <div dangerouslySetInnerHTML={{ __html: translatedHtml }} />
+    </article>
+  );
+}
+```
+
+---
+
+## 3. Static Params Generation (SSG)
+
+You can generate localized static pages at build time:
+
+```ts
+import { generateUrduParams } from 'urdumagic/next';
+
+export async function generateStaticParams() {
+  return generateUrduParams(); // Returns [{ lang: 'en' }, { lang: 'ur' }, { lang: 'roman' }]
+}
+```
+

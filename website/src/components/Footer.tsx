@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useTheme } from "next-themes"
 import { useState, useEffect } from "react"
-import { Github, Twitter } from "lucide-react"
+import { Github, Twitter, Heart } from "lucide-react"
 
 export default function Footer() {
   const { resolvedTheme } = useTheme()
@@ -64,7 +64,7 @@ export default function Footer() {
         </div>
         
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} <span data-no-translate className="bidi-isolate">UrduMagic</span>. Built with ❤️ for the Urdu community.</p>
+          <p className="flex items-center gap-1">© {new Date().getFullYear()} <span data-no-translate className="bidi-isolate">UrduMagic</span>. Built with <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" /> for the Urdu community.</p>
           <div className="flex gap-4">
             <Link href="https://github.com/asad7coder/urdumagic" target="_blank" className="hover:text-primary"><Github className="w-5 h-5" /></Link>
             <Link href="#" target="_blank" className="hover:text-primary"><Twitter className="w-5 h-5" /></Link>

@@ -24,6 +24,12 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "urdumagic": [
+        "../src/index.ts"
+      ],
+      "urdumagic/*": [
+        "../src/*"
       ]
     },
     "target": "ES2017"

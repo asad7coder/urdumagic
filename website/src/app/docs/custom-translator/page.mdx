@@ -1,0 +1,148 @@
+# Custom Vocabulary & Missing Words Detection
+
+UrduMagic is designed with an extensible architecture. While it comes with a built-in **10,000+ entry offline dictionary**, your application may have unique brand names, industry jargon, or newly introduced words.
+
+This guide explains how to:
+1. **Detect missing words** automatically when users browse your website.
+2. **Add custom translations** at runtime using `extendDictionary`.
+3. **Protect technical terms** from translation using `data-no-translate`.
+
+---
+
+## 1. How UrduMagic Handles Missing Words
+
+When Magic Mode scans and translates text nodes on your webpage:
+- **Found in Dictionary:** Instantly translates to accurate Urdu ($O(1)$ lookup).
+- **Missing from Dictionary:** Preserves the original word or falls back to phonetic transliteration without breaking your DOM layout.
+- **Tracked Automatically:** If `collectMissingWords: true` is enabled, UrduMagic captures the untranslated word into a local collector so you can review and add translations.
+
+---
+
+## 2. Automatic Missing Word Detection
+
+You can enable automatic missing word tracking during initialization:
+
+```ts
+import { UrduMagic } from 'urdumagic';
+
+const app = UrduMagic.init({
+  defaultLang: 'en',
+  modes: ['en', 'ur', 'roman'],
+  showSwitcher: true,
+  collectMissingWords: true, // Enables automatic tracking of unknown words
+  persistMissingWords: true, // Saves missing words in localStorage across sessions
+});
+```
+
+### Retrieving Detected Missing Words
+
+To see which words your users have encountered that need translations:
+
+```ts
+// Retrieve array of missing word records with timestamps and count
+const missingWords = app.getMissingWords();
+console.log('Words needing translation:', missingWords);
+```
+
+### Exporting Missing Words as JSON
+
+You can export all tracked missing words as formatted JSON to review or import into your translation pipeline:
+
+```ts
+const exportedJson = app.exportMissingWords();
+console.log(exportedJson);
+```
+
+### Clearing the Missing Word Log
+
+```ts
+// Clears collected words from local storage
+app.clearMissingWords();
+```
+
+---
+
+## 3. Adding Missing Words (`extendDictionary`)
+
+Once you identify words that need custom translations, inject them into the dictionary using `extendDictionary`.
+
+```ts
+import { extendDictionary } from 'urdumagic';
+
+extendDictionary({
+  // Brand & Company Names
+  'urdumagic': 'اردو میجک',
+  'fintech': 'فن ٹیک',
+  'saas': 'ساس پلیٹ فارم',
+
+  // UI & Action Terms
+  'checkout': 'چیک آؤٹ',
+  'dashboard': 'ڈیش بورڈ',
+  'onboarding': 'آن بورڈنگ',
+  'quickstart': 'فوری آغاز',
+});
+```
+
+### What happens when you call `extendDictionary`:
+1. **Instant Memory Merge:** Terms are immediately added to the active dictionary tree.
+2. **Automatic Cache Invalidation:** Stale translation cache entries are purged.
+3. **Live DOM Mutation:** If the user is currently viewing Urdu, visible text updates automatically without a page reload.
+
+---
+
+## 4. Next.js & React Setup Example
+
+In a Next.js App Router or React application, place `extendDictionary` inside your initialization wrapper before `UrduMagic.init`:
+
+```tsx
+'use client';
+
+import { useEffect } from 'react';
+import { UrduMagic, extendDictionary } from 'urdumagic';
+
+export function UrduMagicInit() {
+  useEffect(() => {
+    // 1. Add your application's custom missing words
+    extendDictionary({
+      'mybrand': 'میرا برانڈ',
+      'cart': 'ٹوکری',
+      'signup': 'سائن اپ کریں',
+    });
+
+    // 2. Initialize UrduMagic with missing word collection enabled
+    const instance = UrduMagic.init({
+      defaultLang: 'en',
+      modes: ['en', 'ur', 'roman'],
+      showSwitcher: true,
+      collectMissingWords: true,
+    });
+
+    return () => instance.destroy();
+  }, []);
+
+  return null;
+}
+```
+
+---
+
+## 5. Protecting Elements from Translation (`data-no-translate`)
+
+For technical terms, usernames, product codes, or acronyms that should **never** be translated:
+
+```html
+<!-- Protects specific text spans -->
+<span data-no-translate>UrduMagic Pro v2</span>
+
+<!-- Protects code blocks -->
+<code data-no-translate>npm install urdumagic</code>
+```
+
+---
+
+## Summary Checklist for Developers
+
+1. Enable `collectMissingWords: true` in your development/production environment.
+2. Open your browser console or admin panel and run `app.exportMissingWords()`.
+3. Add the discovered terms to `extendDictionary({ ... })` in your root layout component.
+4. Your website now has 100% complete, customized Urdu coverage.

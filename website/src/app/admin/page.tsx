@@ -27,7 +27,7 @@ export default function AdminDashboard() {
           setIsLoading(false)
           return // Success, stop retrying
         }
-      } catch (e) {
+      } catch {
         // Not initialized yet
         if (retryCount < maxRetries) {
           retryCount++
@@ -141,7 +141,7 @@ export default function AdminDashboard() {
               </div>
               <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-50 mb-1">No missing words</h3>
               <p className="text-neutral-500 dark:text-neutral-400 max-w-sm">
-                Your dictionary is fully covering the website's content right now. Great job!
+                Your dictionary is fully covering the website&apos;s content right now. Great job!
               </p>
             </div>
           ) : (

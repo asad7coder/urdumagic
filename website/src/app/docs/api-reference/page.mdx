@@ -1,42 +1,227 @@
 # API Reference
 
-Complete documentation of all UrduMagic methods and configuration options.
+Complete TypeScript and JavaScript API reference for UrduMagic core functions, static transliteration engine, instance methods, and React hooks.
 
-## Static Methods
+---
 
-These methods are available directly on the `UrduMagic` class.
+## Package Subpath Exports
 
-| Method | Returns | Description |
+UrduMagic provides tree-shakeable modular subpath exports:
+
+| Import Path | Type | Description |
 | :--- | :--- | :--- |
-| `init(config)` | `UrduMagicInstance` | Initializes the library and returns an instance. |
-| `translate(text, targetLang)` | `Promise<string>` | Static translation helper. |
-| `toUrdu(text)` | `string` | Offline Roman Urdu → Urdu script conversion. |
-| `toRoman(text)` | `string` | Offline Urdu script → Roman Urdu conversion. |
-| `detectScript(text)` | `ScriptType` | Detects script: `arabic`, `latin`, `roman-urdu`, `english`, `mixed`. |
+| `urdumagic` | Core Engine | Core client library, static engine, transliteration, and dictionary utilities. |
+| `urdumagic/react` | React Hooks | Native `useUrduMagic` hook, `UrduMagicProvider`, and context consumer. |
+| `urdumagic/server` | SSR / Node.js | Server-side HTML translation (`renderToString`) for Server Components & pre-rendering. |
+| `urdumagic/next` | Next.js Helpers | Static param generators (`generateUrduParams`) and routing middleware helpers. |
+
+---
+
+## Static Engine & Methods
+
+These core methods can be called directly without creating or managing an instance.
+
+<MethodCard
+  name="UrduMagic.init"
+  badge="Static / Initialization"
+  signature="UrduMagic.init(config: UrduMagicConfig): UrduMagicInstance"
+  returns="UrduMagicInstance"
+  description="Initializes the UrduMagic engine in browser DOM, attaches live mutation observers, injects font styles, and optionally renders the floating switcher UI button."
+  parameters={[
+    { name: "config", type: "UrduMagicConfig", description: "Configuration object specifying default language, supported modes, switcher visibility, and security settings." }
+  ]}
+  example={`import { UrduMagic } from 'urdumagic';
+
+const app = UrduMagic.init({
+  defaultLang: 'en',
+  modes: ['en', 'ur', 'roman'],
+  showSwitcher: true
+});`}
+/>
+
+<MethodCard
+  name="UrduMagic.fromEnglish"
+  badge="Offline Dictionary"
+  signature="UrduMagic.fromEnglish(text: string): { urdu: string; roman: string; confidence: 'full' | 'partial' | 'none' }"
+  returns="{ urdu: string; roman: string; confidence: string }"
+  description="Synchronously looks up English words in the built-in 10,000+ offline dictionary with O(1) instant memory lookup."
+  parameters={[
+    { name: "text", type: "string", description: "English word or phrase to translate." }
+  ]}
+  example={`const res = UrduMagic.fromEnglish('welcome');
+console.log(res.urdu); // → 'خوش آمدید'
+console.log(res.roman); // → 'khush amdeed'`}
+/>
+
+<MethodCard
+  name="UrduMagic.toUrdu"
+  badge="Transliteration"
+  signature="UrduMagic.toUrdu(text: string): string"
+  returns="string"
+  description="Converts phonetic Roman Urdu text directly into Nastaliq Urdu script offline using the built-in rules engine."
+  parameters={[
+    { name: "text", type: "string", description: "Phonetic Roman Urdu string." }
+  ]}
+  example={`const script = UrduMagic.toUrdu('aap kaise hain');
+console.log(script); // → 'آپ کیسے ہیں'`}
+/>
+
+<MethodCard
+  name="UrduMagic.toRoman"
+  badge="Transliteration"
+  signature="UrduMagic.toRoman(text: string): string"
+  returns="string"
+  description="Transliterates Urdu script back into readable Roman Urdu Latin characters offline."
+  parameters={[
+    { name: "text", type: "string", description: "Urdu script text." }
+  ]}
+  example={`const roman = UrduMagic.toRoman('شکریہ');
+console.log(roman); // → 'shukriya'`}
+/>
+
+<MethodCard
+  name="UrduMagic.detectScript"
+  badge="Script Analysis"
+  signature="UrduMagic.detectScript(text: string): 'arabic' | 'latin' | 'roman-urdu' | 'english' | 'mixed'"
+  returns="ScriptType"
+  description="Analyzes character codepoints and linguistic patterns to detect the script family and language."
+  parameters={[
+    { name: "text", type: "string", description: "Input text to inspect." }
+  ]}
+  example={`const type = UrduMagic.detectScript('سلام');
+console.log(type); // → 'arabic'`}
+/>
+
+<MethodCard
+  name="UrduMagic.renderToString"
+  badge="SSR / Server"
+  signature="UrduMagic.renderToString(html: string, targetLang: 'ur' | 'roman' | 'en', config?: UrduMagicConfig): Promise<string>"
+  returns="Promise<string>"
+  description="Server-Side Rendering utility. Translates raw HTML strings on Node.js/SSR, preserves tags and attributes, translates text nodes, and injects dir='rtl' for Urdu."
+  parameters={[
+    { name: "html", type: "string", description: "Input HTML markup." },
+    { name: "targetLang", type: "'ur' | 'roman' | 'en'", description: "Target language mode." },
+    { name: "config", type: "UrduMagicConfig", description: "Optional configuration.", optional: true }
+  ]}
+  example={`import { renderToString } from 'urdumagic/server';
+
+const output = await renderToString('<p>Welcome to our store</p>', 'ur');
+// Output: '<p dir="rtl">ہمارے اسٹور میں خوش آمدید</p>'`}
+/>
+
+<MethodCard
+  name="extendDictionary"
+  badge="Custom Vocabulary"
+  signature="extendDictionary(words: Record<string, string>): void"
+  returns="void"
+  description="Injects custom domain terminology, company brand names, or slang into the offline dictionary. Automatically updates cache and alerts active listeners."
+  parameters={[
+    { name: "words", type: "Record<string, string>", description: "Key-value dictionary mapping English terms to Urdu translations." }
+  ]}
+  example={`import { extendDictionary } from 'urdumagic';
+
+extendDictionary({
+  'urdumagic': 'اردو میجک',
+  'fintech': 'فن ٹیک',
+});`}
+/>
+
+---
 
 ## Instance Methods
 
-Available on the object returned by `UrduMagic.init()`.
+These methods are available on the instance object returned by `UrduMagic.init()` or `UrduMagic.getInstance()`.
 
-| Method | Returns | Description |
-| :--- | :--- | :--- |
-| `switchLang(lang)` | `void` | Switches the current page language (`en`, `ur`, `roman`). |
-| `getCurrentLang()` | `string` | Returns the current active language code. |
-| `translate(text, target)` | `Promise<string>` | Translates text using the configured translator. |
-| `toUrdu(text)` | `string` | Instance-level transliteration to Urdu. |
-| `toRoman(text)` | `string` | Instance-level transliteration to Roman. |
-| `destroy()` | `void` | Cleans up the instance and removes event listeners. |
+<MethodCard
+  name="app.switchLang"
+  badge="DOM Language Switch"
+  signature="app.switchLang(lang: 'en' | 'ur' | 'roman'): void"
+  returns="void"
+  description="Switches the entire active website language, scans and mutates visible text nodes, applies dir='rtl'/'ltr', and updates localStorage."
+  parameters={[
+    { name: "lang", type: "'en' | 'ur' | 'roman'", description: "Target language code." }
+  ]}
+  example={`app.switchLang('ur'); // Translates entire website to Urdu`}
+/>
 
-## Configuration Options
+<MethodCard
+  name="app.getCurrentLang"
+  badge="State"
+  signature="app.getCurrentLang(): 'en' | 'ur' | 'roman'"
+  returns="'en' | 'ur' | 'roman'"
+  description="Returns the currently active language mode of the application."
+  example={`const current = app.getCurrentLang(); // → 'en'`}
+/>
 
-Passed to `UrduMagic.init(config)`.
+<MethodCard
+  name="app.translate"
+  badge="Async Pipeline"
+  signature="app.translate(text: string, target: 'en' | 'ur' | 'roman'): Promise<string>"
+  returns="Promise<string>"
+  description="Translates a phrase or sentence using the full multi-tier offline pipeline."
+  parameters={[
+    { name: "text", type: "string", description: "Input text to translate." },
+    { name: "target", type: "'en' | 'ur' | 'roman'", description: "Target language." }
+  ]}
+  example={`const translated = await app.translate('Contact Us', 'ur');
+console.log(translated); // → 'ہم سے رابطہ کریں'`}
+/>
+
+<MethodCard
+  name="app.getMissingWords"
+  badge="Collector"
+  signature="app.getMissingWords(): MissingWordRecord[]"
+  returns="MissingWordRecord[]"
+  description="Returns all unknown or untranslated words tracked during user browsing sessions."
+  example={`const missing = app.getMissingWords();
+console.log(missing);`}
+/>
+
+<MethodCard
+  name="app.destroy"
+  badge="Cleanup"
+  signature="app.destroy(): void"
+  returns="void"
+  description="Unmounts the floating switcher UI, detaches DOM mutation observers, and frees memory listeners."
+  example={`app.destroy();`}
+/>
+
+---
+
+## Configuration Options (`UrduMagicConfig`)
+
+Configuration object accepted by `UrduMagic.init(config)` and `<UrduMagicProvider config={...}>`:
 
 | Option | Type | Default | Required | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `defaultLang` | `'en'\|'ur'\|'roman'` | - | Yes | Initial language on load. |
-| `modes` | `string[]` | - | Yes | Languages to show in switcher. |
-| `showSwitcher` | `boolean` | `true` | No | Show/hide the floating magic button. |
-| `strategy` | `'offline'` | `'offline'` | No | Strategy to use (must be 'offline'). |
-| `performance` | `PerformanceConfig` | - | No | Cache TTL and debounce settings. |
-| `security` | `SecurityConfig` | - | No | Sanitization and prototype protection. |
-| `onLangSwitch` | `function` | - | No | Callback when language changes. |
+| `defaultLang` | `'en' \| 'ur' \| 'roman'` | `'en'` | **Yes** | Initial active language mode on first page load. |
+| `modes` | `('en' \| 'ur' \| 'roman')[]` | `['en', 'ur', 'roman']` | **Yes** | Supported language options displayed in the UI switcher. |
+| `showSwitcher` | `boolean` | `true` | No | Automatically renders the floating language switcher button. |
+| `strategy` | `'offline'` | `'offline'` | No | Translation execution strategy (offline-first). |
+| `performance` | `PerformanceConfig` | `{ debounceMs: 300 }` | No | Controls DOM mutation debounce timing and LRU cache sizes. |
+| `security` | `SecurityConfig` | `{ sanitizeHtml: true }` | No | XSS sanitization and prototype pollution protection. |
+| `onLangSwitch` | `(lang: LangMode) => void` | `undefined` | No | Callback invoked whenever the user switches languages. |
+
+---
+
+## React Integration (`urdumagic/react`)
+
+UrduMagic provides idiomatic React hooks and Context Providers:
+
+```tsx
+import { useUrduMagic, UrduMagicProvider, useUrduMagicContext } from 'urdumagic/react';
+```
+
+### Hook Return Value (`useUrduMagic` & `useUrduMagicContext`)
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `currentLanguage` | `'en' \| 'ur' \| 'roman'` | Active language code. |
+| `switchLang` | `(lang: LangMode) => void` | Function to switch the website language. |
+| `translate` | `(text: string, target: LangMode) => Promise<string>` | Translation helper function. |
+| `toUrdu` | `(text: string) => string` | Roman Urdu to Urdu script transliteration. |
+| `toRoman` | `(text: string) => string` | Urdu script to Roman Urdu transliteration. |
+| `isTranslating` | `boolean` | `true` while DOM translation mutations are processing. |
+| `isReady` | `boolean` | `true` once dictionary and fonts are loaded in memory. |
+| `error` | `string \| null` | Error message if initialization encountered an issue. |
+| `instance` | `UrduMagicInstance \| null` | Direct reference to the underlying core instance. |

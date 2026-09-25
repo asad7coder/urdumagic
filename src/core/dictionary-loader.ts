@@ -3,7 +3,9 @@
  * Handles lazy-loading of the 1.2MB dictionary file.
  */
 
-let cachedDict: Map<string, string> | null = null
+let cachedDict: Map<string, string> | null = null;
+let baseDictLoaded = false;
+const customDict = new Map<string, string>();
 
 function normalizeKey(text: string): string {
   return text.toLowerCase().trim()
@@ -23,9 +25,18 @@ export function onDictionaryUpdate(cb: DictUpdateCallback): () => void {
   return () => { dictListeners.delete(cb); };
 }
 
+function ensureMap(): Map<string, string> {
+  if (!cachedDict) {
+    cachedDict = new Map<string, string>();
+  }
+  return cachedDict;
+}
+
 // Sync version (for SSR - needed immediately)
 export function getDictionarySync(): Map<string, string> {
-  if (cachedDict) return cachedDict
+  const dict = ensureMap();
+  if (baseDictLoaded) return dict;
+
   // For SSR, read the file synchronously
   const fs = require('fs')
   const path = require('path')
@@ -46,33 +57,66 @@ export function getDictionarySync(): Map<string, string> {
   }
 
   const raw = JSON.parse(fs.readFileSync(filePath, 'utf8'))
-  cachedDict = new Map(Object.entries(raw))
-  return cachedDict
+  for (const [key, value] of Object.entries(raw as Record<string, string>)) {
+    const nk = normalizeKey(key);
+    if (!dict.has(nk)) {
+      dict.set(nk, value);
+    }
+  }
+  // Re-apply custom extensions to ensure they take precedence
+  for (const [key, value] of customDict.entries()) {
+    dict.set(key, value);
+  }
+  baseDictLoaded = true;
+  return dict;
 }
 
 // Async version (for browser - lazy load)
 export async function getDictionaryAsync(): Promise<Map<string, string>> {
-  if (cachedDict) return cachedDict
-  const { default: raw } = await import('../data/english-urdu-dictionary-flat.json')
-  cachedDict = new Map(Object.entries(raw))
-  return cachedDict
+  const dict = ensureMap();
+  if (baseDictLoaded) return dict;
+
+  try {
+    const { default: raw } = await import('../data/english-urdu-dictionary-flat.json')
+    for (const [key, value] of Object.entries(raw as Record<string, string>)) {
+      const nk = normalizeKey(key);
+      if (!dict.has(nk)) {
+        dict.set(nk, value);
+      }
+    }
+    // Re-apply custom extensions to ensure they take precedence
+    for (const [key, value] of customDict.entries()) {
+      dict.set(key, value);
+    }
+    baseDictLoaded = true;
+  } catch (e) {
+    // If running in node without bundle
+    try {
+      getDictionarySync();
+    } catch {
+      // Ignored
+    }
+  }
+  return dict;
 }
 
 /**
  * Looks up a word in the dictionary.
  */
 export function lookupWord(text: string): string | undefined {
-  if (!cachedDict) {
+  const nk = normalizeKey(text);
+  if (customDict.has(nk)) {
+    return customDict.get(nk);
+  }
+  if (!baseDictLoaded) {
     // Lazy load dictionary on first lookup (works in Node.js/SSR)
     try {
       getDictionarySync()
     } catch {
-      // In browser, dictionary won't be available until loaded async
-      return undefined
+      // In browser, async loader will populate base dictionary
     }
   }
-  const dict = cachedDict
-  return dict?.get(normalizeKey(text))
+  return cachedDict?.get(nk);
 }
 
 /**
@@ -81,19 +125,12 @@ export function lookupWord(text: string): string | undefined {
  * remove newly-covered words from the missing-word collector.
  */
 export function extendDictionary(words: Record<string, string>) {
-  if (!cachedDict) {
-    try {
-      getDictionarySync()
-    } catch {
-      cachedDict = new Map()
-    }
-  }
-  const dict = cachedDict
-  if (!dict) return
-
+  const dict = ensureMap();
   const normalizedWords: string[] = [];
+
   for (const [key, value] of Object.entries(words)) {
     const nk = normalizeKey(key)
+    customDict.set(nk, value)
     dict.set(nk, value)
     normalizedWords.push(nk)
   }

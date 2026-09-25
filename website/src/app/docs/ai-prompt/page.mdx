@@ -1,0 +1,150 @@
+# AI Integration Prompts
+
+Integrate UrduMagic effortlessly into your project using any AI coding assistant (Cursor, GitHub Copilot, ChatGPT, Claude, Antigravity, v0, Windsurf, etc.).
+
+Use the interactive prompt generator below or choose a pre-configured template for your exact stack.
+
+---
+
+<AIPromptBuilder />
+
+---
+
+## Direct Ready-to-Use Prompts
+
+Pick and copy the exact prompt matching your framework architecture:
+
+<PromptCard
+  title="Universal Master Prompt"
+  iconType="universal"
+  badge="Recommended"
+  description="All-in-one prompt suitable for any web stack, including offline rules and verification tests."
+  prompt={`You are an expert web developer. Please integrate UrduMagic into our web application to provide 100% offline, privacy-focused Urdu, Roman Urdu, and English language support.
+
+### 🎯 Objective:
+Add complete multilingual support (English, Urdu script, and Roman Urdu) using the urdumagic library.
+
+### 📦 Key Rules & Requirements:
+1. **Library**: Use urdumagic (Install with npm install urdumagic or CDN https://unpkg.com/urdumagic/dist/urdumagic.js).
+2. **100% Offline**: UrduMagic runs completely offline with a built-in 10,000+ entry dictionary and transliteration engine. Do NOT configure external translation APIs or cloud keys.
+3. **Framework Integration**:
+   - React / Vite: Use import { useUrduMagic, UrduMagicProvider, useUrduMagicContext } from 'urdumagic/react'.
+   - Next.js App Router: Initialize UrduMagic inside a client component ('use client') in app/layout.tsx or use renderToString from urdumagic/server for SSR.
+   - Plain HTML / Vanilla JS: Initialize using UrduMagic.init({ defaultLang: 'en', modes: ['en', 'ur', 'roman'], showSwitcher: true }).
+4. **Layout & RTL**:
+   - Ensure the <html> or container receives dir="rtl" when Urdu (ur) is active and dir="ltr" for English/Roman.
+   - Protect brand names, code snippets, and acronyms from translation by adding the data-no-translate attribute.
+5. **Custom Vocabulary**:
+   - Use extendDictionary({ 'term': 'ترجمہ' }) from urdumagic for custom brand terms or application-specific words.
+
+### 🛠️ Implementation Steps:
+1. Install urdumagic as a dependency.
+2. Setup the initialization wrapper / provider at the root layout of our application.
+3. Add a language switcher UI toggle or enable the built-in floating switcher (showSwitcher: true).
+4. Wrap any non-translatable text elements (logos, usernames, code blocks) with data-no-translate.
+5. If custom terms are required, call extendDictionary({...}) prior to initialization.
+
+### 🧪 Verification & Post-Implementation Testing:
+After implementing, execute the following verification steps:
+1. Build Validation: Run npm run build to verify there are zero TypeScript, Webpack, or bundler resolution errors.
+2. Offline Dictionary Test: Test that UrduMagic.fromEnglish('welcome') or UrduMagic.translate('welcome', 'ur') returns 'خوش آمدید'.
+3. Transliteration Test:
+   - Verify UrduMagic.toUrdu('salam') returns 'سلام'.
+   - Verify UrduMagic.toRoman('سلام') returns 'salam'.
+4. Script Detection Test:
+   - Verify UrduMagic.detectScript('سلام') identifies as 'arabic'.
+   - Verify UrduMagic.detectScript('salam') identifies as 'roman-urdu'.
+5. DOM Language Switching: Verify that switching languages dynamically updates the page text, sets dir="rtl" for Urdu, and maintains application state smoothly without memory leaks.`}
+/>
+
+<PromptCard
+  title="Next.js App Router & Server Components"
+  iconType="nextjs"
+  badge="Next.js 14 / 15"
+  description="Optimized for Next.js App Router, React Server Components (RSC), and Server-Side Rendering (SSR)."
+  prompt={`Please integrate UrduMagic into our Next.js App Router application.
+
+### Requirements:
+1. Install urdumagic: npm install urdumagic
+2. Create a client initialization component components/UrduMagicInit.tsx with 'use client':
+   'use client';
+   import { useEffect } from 'react';
+   import { UrduMagic } from 'urdumagic';
+
+   export function UrduMagicInit() {
+     useEffect(() => {
+       const instance = UrduMagic.init({
+         defaultLang: 'en',
+         modes: ['en', 'ur', 'roman'],
+         showSwitcher: true
+       });
+       return () => instance.destroy();
+     }, []);
+     return null;
+   }
+3. Include <UrduMagicInit /> in app/layout.tsx.
+4. For Server Components / SSR, use renderToString from urdumagic/server when pre-rendering translated HTML.
+5. Ensure dir="rtl" is set when Urdu script is active and protect brand names with data-no-translate.
+6. Verify the build runs cleanly with npm run build.`}
+/>
+
+<PromptCard
+  title="React & Vite (Hooks & Context)"
+  iconType="react"
+  badge="Vite / SPA"
+  description="Tailored for client-rendered React applications using hooks and UrduMagicProvider."
+  prompt={`Please integrate UrduMagic into our React/Vite application using the official urdumagic/react package.
+
+### Requirements:
+1. Install urdumagic: npm install urdumagic
+2. Wrap the application tree in UrduMagicProvider from urdumagic/react or use the useUrduMagic hook:
+   import { useUrduMagic } from 'urdumagic/react';
+
+   export function LanguageSwitcher() {
+     const { currentLanguage, switchLang } = useUrduMagic({
+       defaultLang: 'en',
+       modes: ['en', 'ur', 'roman']
+     });
+
+     return (
+       <div className="flex gap-2">
+         <button onClick={() => switchLang('ur')}>اردو</button>
+         <button onClick={() => switchLang('roman')}>Roman</button>
+         <button onClick={() => switchLang('en')}>English</button>
+       </div>
+     );
+   }
+3. Apply data-no-translate to brand logos and usernames.
+4. Test that switchLang updates page content and sets dir="rtl" for Urdu.`}
+/>
+
+<PromptCard
+  title="Plain HTML / CDN / WordPress / Webflow"
+  iconType="vanilla"
+  badge="Vanilla JS"
+  description="For static HTML websites or template platforms using simple CDN script tags."
+  prompt={`Please add UrduMagic to our HTML page using CDN.
+
+### Instructions:
+1. Add the CDN script tag before the closing </body> tag:
+   <script src="https://unpkg.com/urdumagic/dist/urdumagic.js"></script>
+2. Initialize UrduMagic in a script tag:
+   <script>
+     UrduMagic.init({
+       defaultLang: 'en',
+       modes: ['en', 'ur', 'roman'],
+       showSwitcher: true
+     });
+   </script>
+3. Mark any non-translatable text elements with data-no-translate.`}
+/>
+
+---
+
+## How to Customize Any Prompt
+
+When sending prompts to your AI assistant, feel free to append any specific project requirements:
+
+- **Custom UI Switcher**: *"Set `showSwitcher: false` and build custom toggle buttons in our navbar."*
+- **Brand Vocabulary**: *"Call `extendDictionary({ 'brand': 'برانڈ' })` before initialization."*
+- **Selective Translation**: *"Only apply Urdu translation inside the `#main-article` container."*

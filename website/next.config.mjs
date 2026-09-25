@@ -11,6 +11,27 @@ const nextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   transpilePackages: ['urdumagic'],
   outputFileTracingRoot: path.join(__dirname, '..'),
+  webpack: (config, { isServer }) => {
+    config.resolve.extensionAlias = {
+      '.js': ['.ts', '.tsx', '.js'],
+      '.mjs': ['.mts', '.mjs'],
+      '.cjs': ['.cts', '.cjs'],
+    };
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'urdumagic$': path.resolve(__dirname, '../src/index.ts'),
+      'urdumagic': path.resolve(__dirname, '../src'),
+    };
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        url: false,
+      };
+    }
+    return config;
+  },
 }
 
 const withMDX = createMDX({

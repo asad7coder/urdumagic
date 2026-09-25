@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight, Sparkles, Check } from "lucide-react"
+import { ArrowRight, Sparkles, Check, Rocket, Zap } from "lucide-react"
 import Link from "next/link"
 import HeroDemo from "./HeroDemo"
 
@@ -8,19 +8,19 @@ const BADGES = [
   { label: "Roman ↔ Urdu", isTechnical: false },
   { label: "English → Urdu", isTechnical: false },
   { label: "10K+ Dictionary", isTechnical: true },
+  { label: "Next.js & SSR", isTechnical: true },
+  { label: "React Hooks", isTechnical: true },
   { label: "Offline First", isTechnical: false },
   { label: "RTL Ready", isTechnical: true },
   { label: "TypeScript", isTechnical: true },
   { label: "MIT License", isTechnical: true },
 ]
 
-
-
 const STATS = [
   { value: "16 KB", label: "Core Library" },
   { value: "10,000+", label: "Dictionary Entries" },
   { value: "100%", label: "Offline First" },
-  { value: "MIT", label: "License" },
+  { value: "v0.4.0", label: "Latest Release" },
 ]
 
 const SHOWCASES = [
@@ -44,8 +44,8 @@ export default function Hero() {
 
           {/* Version Badge */}
           <div dir="ltr" className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/90 text-sm font-medium mb-8 animate-in fade-in slide-in-from-bottom-3 duration-700">
-            <Sparkles className="w-4 h-4 text-[#f59e0b]" />
-            <span>🚀 <span data-no-translate className="bidi-isolate">v0.2.0</span> is now available</span>
+            <Rocket className="w-3.5 h-3.5 text-[#f59e0b]" />
+            <span><span data-no-translate className="bidi-isolate">v0.4.0</span> is now available</span>
           </div>
 
           {/* Heading */}
@@ -128,7 +128,10 @@ export default function Hero() {
               >
                 <div className="flex justify-between items-start mb-3">
                   <span className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Roman → Urdu</span>
-                  <span className="px-1.5 py-0.5 rounded bg-[#1e3a8a] text-white/80 text-[8px] font-bold uppercase tracking-tighter">Offline ⚡</span>
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#1e3a8a] text-white/80 text-[8px] font-bold uppercase tracking-tighter">
+                    <Zap className="w-2.5 h-2.5 text-amber-400" />
+                    Offline
+                  </span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span dir="ltr" lang="ro" className="text-sm font-mono text-white/60 text-left">{item.roman}</span>

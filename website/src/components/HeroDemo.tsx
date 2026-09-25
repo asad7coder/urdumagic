@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { ArrowRightLeft, Sparkles, Info, ArrowDownUp } from "lucide-react"
+import { ArrowRightLeft, Sparkles, Info, ArrowDownUp, Zap, Check } from "lucide-react"
 
 type BoxType = 'english' | 'roman' | 'urdu' | null
 
@@ -30,7 +30,11 @@ export default function HeroDemo() {
     const loadLib = async () => {
       try {
         const urdumagic = await import("urdumagic")
-        libRef.current = urdumagic.UrduMagic || urdumagic.default
+        const lib = urdumagic.UrduMagic || urdumagic.default
+        libRef.current = lib
+        if (lib?.autoTranslate) {
+          await lib.autoTranslate("hello", "ur")
+        }
         setIsReady(true)
       } catch (e) {
         console.error("Failed to load UrduMagic", e)
@@ -54,13 +58,13 @@ export default function HeroDemo() {
 
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
     debounceTimer.current = setTimeout(() => {
-      if (!libRef.current || !isReady) return
+      if (!libRef.current) return
       
       const result = libRef.current.fromEnglish(val)
       setUrdu(result.urdu)
       setRoman(result.roman)
       setConfidence(result.confidence)
-    }, 250)
+    }, 200)
   }
 
   const onRomanChange = (val: string) => {
@@ -124,7 +128,7 @@ export default function HeroDemo() {
             <Box 
               type="english" 
               label="English" 
-              icon="🇬🇧" 
+              icon="EN" 
               value={english} 
               placeholder="Type English here..." 
               fontClass="text-lg"
@@ -180,14 +184,16 @@ export default function HeroDemo() {
         {/* Footer */}
         <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-white/5 pt-6 text-[10px] text-white/30 uppercase tracking-widest font-bold">
            <div className="flex items-center gap-3">
-             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#1e3a8a]/40 border border-[#1e3a8a]/60 text-white/90">
+             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1e3a8a]/40 border border-[#1e3a8a]/60 text-white/90">
                 <Sparkles className="w-3 h-3 text-[#f59e0b]" />
-                Powered by UrduMagic ⚡ Offline
+                <span>Powered by UrduMagic</span>
+                <Zap className="w-3 h-3 text-amber-400 ml-1" />
+                <span>Offline</span>
              </div>
              {isTranslating && (
                <span className="text-[#f59e0b] animate-pulse">Translating...</span>
              )}
-             <span>Library ready: {isReady ? 'YES ✓' : 'Loading...'}</span>
+             <span className="flex items-center gap-1">Library ready: {isReady ? <><Check className="w-3 h-3 text-emerald-400 inline" /> YES</> : 'Loading...'}</span>
            </div>
            
            {error && (
