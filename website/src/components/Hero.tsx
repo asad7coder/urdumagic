@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight, Sparkles, Check, Rocket, Zap } from "lucide-react"
+import { ArrowRight, Check, Rocket, Zap } from "lucide-react"
 import Link from "next/link"
 import HeroDemo from "./HeroDemo"
 

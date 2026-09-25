@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Code2, ArrowRight, Sparkles, Box } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
 interface Parameter {
   name: string

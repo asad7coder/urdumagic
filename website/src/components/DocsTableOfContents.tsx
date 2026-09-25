@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
-import { AlignLeft, ArrowUp, Github, Sparkles } from "lucide-react"
+import { AlignLeft, ArrowUp, Github } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface TOCItem {

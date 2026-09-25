@@ -17,6 +17,11 @@ const nextConfig = {
       '.mjs': ['.mts', '.mjs'],
       '.cjs': ['.cts', '.cjs'],
     };
+    config.resolve.modules = [
+      path.resolve(__dirname, 'node_modules'),
+      'node_modules',
+      ...(config.resolve.modules || []),
+    ];
     config.resolve.alias = {
       ...config.resolve.alias,
       'urdumagic$': path.resolve(__dirname, '../src/index.ts'),

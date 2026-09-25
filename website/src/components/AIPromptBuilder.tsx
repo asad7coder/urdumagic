@@ -5,7 +5,6 @@ import {
   Check, 
   Copy, 
   Sparkles, 
-  Sliders, 
   Layers, 
   CheckCircle2, 
   Terminal, 
